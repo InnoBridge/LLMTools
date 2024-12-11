@@ -5,9 +5,6 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Flux;
-import org.springframework.http.MediaType;
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -26,6 +23,7 @@ import io.github.innobridge.llmtools.models.request.PushRequest;
 import io.github.innobridge.llmtools.models.request.ShowRequest;
 import io.github.innobridge.llmtools.models.response.EmbedResponse;
 import io.github.innobridge.llmtools.models.response.GenerateResponse;
+import io.github.innobridge.llmtools.models.response.ProgressResponse;
 import lombok.extern.slf4j.Slf4j;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -35,18 +33,16 @@ import static io.github.innobridge.llmtools.constants.OllamaConstants.API_PUSH_R
 import static io.github.innobridge.llmtools.constants.OllamaConstants.API_COPY_ROUTE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.API_DELETE_ROUTE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.API_SHOW_ROUTE;
-import static io.github.innobridge.llmtools.constants.OllamaConstants.API_MODELS_ROUTE;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.V1_MODELS_ROUTE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.API_BLOBS_ROUTE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.API_PS_ROUTE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.API_PULL_ROUTE;
-import static io.github.innobridge.llmtools.constants.OllamaConstants.API_COMPLETIONS_ROUTE;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.V1_COMPLETIONS_ROUTE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.API_CHAT_ROUTE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.API_CHAT_COMPLETIONS_ROUTE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.API_EMBED_ROUTE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.API_TAGS_ROUTE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.API_VERSION_ROUTE;
-
-import java.io.IOException;
 
 /**
  * Implementation of the OllamaClient interface using WebClient.
@@ -60,7 +56,7 @@ public class OllamaClientImpl implements OllamaClient {
     public OllamaClientImpl(WebClient webclient) {
         this.webClient = webclient;
         this.objectMapper = new ObjectMapper();
-        this.objectMapper.registerModule(new JavaTimeModule()); 
+        this.objectMapper.registerModule(new JavaTimeModule());
     }
 
     @Override
@@ -116,7 +112,7 @@ public class OllamaClientImpl implements OllamaClient {
     @Override
     public Mono<String> getModel(String model) {
         return webClient.get()
-                .uri(API_MODELS_ROUTE + "/{model}", model)
+                .uri(V1_MODELS_ROUTE + "/{model}", model)
                 .retrieve()
                 .bodyToMono(String.class);
     }
@@ -149,13 +145,27 @@ public class OllamaClientImpl implements OllamaClient {
     }
 
     @Override
-    public Mono<String> pull(String name, boolean insecure) {
+    public Mono<ProgressResponse> pull(PullRequest request) {
+        request = request.setStream(false);
         return webClient.post()
                 .uri(API_PULL_ROUTE)
                 .contentType(APPLICATION_JSON)
-                .bodyValue(new PullRequest(name, insecure))
+                .bodyValue(request)
                 .retrieve()
-                .bodyToMono(String.class);
+                .bodyToMono(ProgressResponse.class)
+                .doOnError(this::handleErrorLogging);
+    }
+
+    @Override
+    public Flux<ProgressResponse> pullStream(PullRequest request) {
+        request = request.setStream(true);
+        return webClient.post()
+                .uri(API_PULL_ROUTE)
+                .contentType(APPLICATION_JSON)
+                .bodyValue(request)
+                .retrieve()
+                .bodyToFlux(ProgressResponse.class)
+                .doOnError(this::handleErrorLogging);
     }
 
     @Override
@@ -187,7 +197,7 @@ public class OllamaClientImpl implements OllamaClient {
     @Override
     public Flux<String> completions(String model, String prompt, boolean stream) {
         return webClient.post()
-                .uri(API_COMPLETIONS_ROUTE)
+                .uri(V1_COMPLETIONS_ROUTE)
                 .contentType(APPLICATION_JSON)
                 .bodyValue(new CompletionsRequest(model, prompt, stream))
                 .retrieve()
@@ -251,7 +261,7 @@ public class OllamaClientImpl implements OllamaClient {
     @Override
     public Mono<String> listModels() {
         return webClient.get()
-                .uri(API_MODELS_ROUTE)
+                .uri(V1_MODELS_ROUTE)
                 .retrieve()
                 .bodyToMono(String.class);
     }

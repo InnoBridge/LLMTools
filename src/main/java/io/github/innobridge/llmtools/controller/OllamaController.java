@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -17,6 +18,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.github.innobridge.llmtools.client.OllamaClient;
 import io.github.innobridge.llmtools.models.request.GenerateRequest;
 import io.github.innobridge.llmtools.models.response.GenerateResponse;
+import io.github.innobridge.llmtools.models.response.ProgressResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -71,6 +73,16 @@ import io.github.innobridge.llmtools.models.response.EmbedResponse;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.EMBED_ENDPOINT;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.INPUT;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.TRUNCATE;
+
+import io.github.innobridge.llmtools.models.request.PullRequest;
+import io.github.innobridge.llmtools.models.request.PullRequest.PullRequestBuilder;
+
+import static io.github.innobridge.llmtools.constants.OllamaConstants.PULL_ENDPOINT;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.PULL_STREAM_ENDPOINT;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.INSECURE;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.USERNAME;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.PASSWORD;
+import static org.springframework.http.MediaType.APPLICATION_NDJSON_VALUE;
 
 @Slf4j
 @RestController
@@ -302,5 +314,62 @@ public class OllamaController {
                 return Mono.just(ResponseEntity.status(500).body(null));
             });
     }
-    
+
+    @Operation(summary = "Download model from Ollama Library.")
+    @ApiResponses(value= {
+            @ApiResponse(responseCode = CREATED,
+                    description = "Download model from Ollama Library.",
+                    content = @Content(mediaType = CONTENT_TYPE,
+                            schema = @Schema(implementation = ProgressResponse.class)))
+                            })
+    @PostMapping(PULL_ENDPOINT)
+    public Mono<ResponseEntity<ProgressResponse>> pullModel(
+        @RequestParam(required = true, value = MODEL) String model,
+        @RequestParam(required = false, value = INSECURE) Boolean insecure,
+        @RequestParam(required = false, value = USERNAME) String username,
+        @RequestParam(required = false, value = PASSWORD) String password
+    ) {
+        PullRequestBuilder builder = PullRequest.builder()
+            .model(model);
+        if (insecure != null) builder.insecure(insecure);
+        if (username != null) builder.username(username);
+        if (password != null) builder.password(password);
+        
+        ResponseEntity<ProgressResponse> response = ollamaClient.pull(builder.build())
+            .map(ResponseEntity::ok)
+            .onErrorResume(e -> Mono.just(ResponseEntity.status(500).body(null)))
+            .block();
+            
+        return Mono.just(response);
+    }
+
+    @Operation(summary = "Download model from Ollama Library streaming progress.")
+    @ApiResponses(value= {
+            @ApiResponse(responseCode = CREATED,
+                    description = "Download model from Ollama Library streaming progress.",
+                    content = @Content(mediaType = CONTENT_TYPE,
+                            schema = @Schema(implementation = ProgressResponse.class)))
+                            })
+    @PostMapping(value = PULL_STREAM_ENDPOINT, produces = APPLICATION_NDJSON_VALUE)
+    public Flux<ServerSentEvent<ProgressResponse>> pullModelStream(
+        @RequestParam(required = true, value = MODEL) String model,
+        @RequestParam(required = false, value = INSECURE) Boolean insecure,
+        @RequestParam(required = false, value = USERNAME) String username,
+        @RequestParam(required = false, value = PASSWORD) String password
+    ) {
+        PullRequestBuilder builder = PullRequest.builder()
+            .model(model);
+        if (insecure != null) builder.insecure(insecure);
+        if (username != null) builder.username(username);
+        if (password != null) builder.password(password);
+            
+        return ollamaClient.pullStream(builder.build())
+        .map(response -> ServerSentEvent.<ProgressResponse>builder()
+            .data(response)
+            .build())
+        .onErrorResume(e -> {
+            log.error("Error generating stream", e);
+            return Flux.empty();
+        });
+    }
 }

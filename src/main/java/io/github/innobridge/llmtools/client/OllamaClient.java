@@ -9,8 +9,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import io.github.innobridge.llmtools.models.request.EmbedRequest;
 import io.github.innobridge.llmtools.models.request.GenerateRequest;
+import io.github.innobridge.llmtools.models.request.PullRequest;
 import io.github.innobridge.llmtools.models.response.EmbedResponse;
 import io.github.innobridge.llmtools.models.response.GenerateResponse;
+import io.github.innobridge.llmtools.models.response.ProgressResponse;
 
 /**
  * Interface for interacting with the Ollama API.
@@ -76,10 +78,15 @@ public interface OllamaClient {
 
     /**
      * Pull a model from a registry.
-     * @param name The name of the model to pull
-     * @param insecure Allow insecure connections to the registry
+     * @param request The pull request containing model, username, password, and other parameters
      */
-    Mono<String> pull(String name, boolean insecure);
+    Mono<ProgressResponse> pull(PullRequest request);
+
+    /**
+     * Pull a model from a registry with streaming support.
+     * @param request The pull request containing model, username, password, and other parameters
+     */
+    Flux<ProgressResponse> pullStream(PullRequest request);
 
     /**
      * Generate a response from a model.

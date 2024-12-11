@@ -16,11 +16,11 @@ public class OllamaConstants {
     public static final String API_COPY_ROUTE = "/api/copy";
     public static final String API_DELETE_ROUTE = "/api/delete";
     public static final String API_SHOW_ROUTE = "/api/show";
-    public static final String API_MODELS_ROUTE = "/v1/models";
+    public static final String V1_MODELS_ROUTE = "/v1/models";
     public static final String API_BLOBS_ROUTE = "/api/blobs";
     public static final String API_PS_ROUTE = "/api/ps";
     public static final String API_PULL_ROUTE = "/api/pull";
-    public static final String API_COMPLETIONS_ROUTE = "/v1/completions";
+    public static final String V1_COMPLETIONS_ROUTE = "/v1/completions";
     public static final String API_CHAT_ROUTE = "/api/chat";
     public static final String API_CHAT_COMPLETIONS_ROUTE = "/v1/chat/completions";
     public static final String API_EMBED_ROUTE = "/api/embed";
@@ -31,6 +31,8 @@ public class OllamaConstants {
     public static final String GENERATE_ENDPOINT = "/ollama/generate";
     public static final String GENERATE_STREAM_ENDPOINT = "/ollama/generate/stream";
     public static final String EMBED_ENDPOINT = "/ollama/embed";
+    public static final String PULL_ENDPOINT = "/ollama/pull";
+    public static final String PULL_STREAM_ENDPOINT = "/ollama/pull/stream";
 
     // Field Names
     public static final String MODEL = "model";
@@ -47,7 +49,14 @@ public class OllamaConstants {
     public static final String INPUT = "input";
     public static final String TRUNCATE = "truncate";
     public static final String EMBEDDINGS = "embeddings";
-
+    public static final String INSECURE = "insecure";
+    public static final String USERNAME = "username";
+    public static final String PASSWORD = "password";
+    public static final String STATUS = "status";
+    public static final String DIGEST = "digest";
+    public static final String TOTAL = "total";
+    public static final String COMPLETED = "completed";
+    
     // Options
     public static final String NUM_KEEP = "num_keep";
     public static final String SEED = "seed";
