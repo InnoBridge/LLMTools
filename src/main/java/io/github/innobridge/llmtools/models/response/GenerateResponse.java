@@ -1,27 +1,34 @@
 package io.github.innobridge.llmtools.models.response;
 
+import static io.github.innobridge.llmtools.constants.OllamaConstants.CONTEXT;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.CREATED_AT;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.DONE;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.DONE_REASON;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.MODEL;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.RESPONSE;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.util.List;
 
 public class GenerateResponse extends Metrics {
 
-    @JsonProperty("model")
+    @JsonProperty(MODEL)
     private String model;
 
-    @JsonProperty("created_at")
+    @JsonProperty(CREATED_AT)
     private Instant createdAt;
 
-    @JsonProperty("response")
+    @JsonProperty(RESPONSE)
     private String response;
 
-    @JsonProperty("done")
+    @JsonProperty(DONE)
     private boolean done;
 
-    @JsonProperty("done_reason")
+    @JsonProperty(DONE_REASON)
     private String doneReason;
 
-    @JsonProperty("context")
+    @JsonProperty(CONTEXT)
     private List<Integer> context;
 
     // Getters and Setters

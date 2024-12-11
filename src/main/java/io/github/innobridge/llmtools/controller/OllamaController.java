@@ -74,6 +74,7 @@ import static io.github.innobridge.llmtools.constants.OllamaConstants.EMBED_ENDP
 import static io.github.innobridge.llmtools.constants.OllamaConstants.INPUT;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.TRUNCATE;
 
+import io.github.innobridge.llmtools.models.request.CopyRequest;
 import io.github.innobridge.llmtools.models.request.PullRequest;
 import io.github.innobridge.llmtools.models.request.PullRequest.PullRequestBuilder;
 
@@ -83,6 +84,10 @@ import static io.github.innobridge.llmtools.constants.OllamaConstants.INSECURE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.USERNAME;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.PASSWORD;
 import static org.springframework.http.MediaType.APPLICATION_NDJSON_VALUE;
+
+import static io.github.innobridge.llmtools.constants.OllamaConstants.COPY_ENDPOINT;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.SOURCE;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.DESTINATION;
 
 @Slf4j
 @RestController
@@ -371,5 +376,25 @@ public class OllamaController {
             log.error("Error generating stream", e);
             return Flux.empty();
         });
+    }
+
+    @Operation(summary = "Copy a model")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = CREATED,
+                    description = "Model copied successfully",
+                    content = @Content(mediaType = CONTENT_TYPE))
+    })
+    @PostMapping(COPY_ENDPOINT)
+    public Mono<ResponseEntity<Object>> copyModel(
+            @RequestParam(required = true, value = SOURCE) String source,
+            @RequestParam(required = true, value = DESTINATION) String destination) {
+        
+        CopyRequest copyRequest = new CopyRequest(source, destination);
+        return ollamaClient.copy(copyRequest)
+                .then(Mono.just(ResponseEntity.ok().build()))
+                .onErrorResume(e -> {
+                    log.error("Error copying model", e);
+                    return Mono.just(ResponseEntity.status(500).build());
+                });
     }
 }

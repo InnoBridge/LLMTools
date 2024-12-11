@@ -80,13 +80,13 @@ public class OllamaClientImpl implements OllamaClient {
     }
 
     @Override
-    public Mono<String> copy(String source, String destination) {
+    public Mono<Void> copy(CopyRequest request) {
         return webClient.post()
                 .uri(API_COPY_ROUTE)
                 .contentType(APPLICATION_JSON)
-                .bodyValue(new CopyRequest(source, destination))
+                .bodyValue(request)
                 .retrieve()
-                .bodyToMono(String.class);
+                .bodyToMono(Void.class);
     }
 
     @Override

@@ -33,6 +33,7 @@ public class OllamaConstants {
     public static final String EMBED_ENDPOINT = "/ollama/embed";
     public static final String PULL_ENDPOINT = "/ollama/pull";
     public static final String PULL_STREAM_ENDPOINT = "/ollama/pull/stream";
+    public static final String COPY_ENDPOINT = "/ollama/copy";
 
     // Field Names
     public static final String MODEL = "model";
@@ -56,6 +57,8 @@ public class OllamaConstants {
     public static final String DIGEST = "digest";
     public static final String TOTAL = "total";
     public static final String COMPLETED = "completed";
+    public static final String SOURCE = "source";
+    public static final String DESTINATION = "destination";
     
     // Options
     public static final String NUM_KEEP = "num_keep";
@@ -76,5 +79,11 @@ public class OllamaConstants {
     public static final String MIROSTAT_ETA = "mirostat_eta";
     public static final String PENALIZE_NEWLINE = "penalize_newline";
     public static final String STOP = "stop";
+
+    // Response Fields
+    public static final String CREATED_AT = "created_at";
+    public static final String RESPONSE = "response";
+    public static final String DONE = "done";
+    public static final String DONE_REASON = "done_reason";
 
 }

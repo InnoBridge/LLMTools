@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import io.github.innobridge.llmtools.models.request.EmbedRequest;
 import io.github.innobridge.llmtools.models.request.GenerateRequest;
 import io.github.innobridge.llmtools.models.request.PullRequest;
+import io.github.innobridge.llmtools.models.request.CopyRequest;
 import io.github.innobridge.llmtools.models.response.EmbedResponse;
 import io.github.innobridge.llmtools.models.response.GenerateResponse;
 import io.github.innobridge.llmtools.models.response.ProgressResponse;
@@ -35,10 +36,9 @@ public interface OllamaClient {
 
     /**
      * Copy a model.
-     * @param source The name of the source model
-     * @param destination The name of the destination model
+     * @param request The copy request containing source and destination model names
      */
-    Mono<String> copy(String source, String destination);
+    Mono<Void> copy(CopyRequest request);
 
     /**
      * Delete a model.
