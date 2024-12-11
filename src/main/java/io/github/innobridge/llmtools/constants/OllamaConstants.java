@@ -1,6 +1,14 @@
 package io.github.innobridge.llmtools.constants;
 
 public class OllamaConstants {
+    // Metrics constants
+    public static final String TOTAL_DURATION = "total_duration";
+    public static final String LOAD_DURATION = "load_duration";
+    public static final String PROMPT_EVAL_COUNT = "prompt_eval_count";
+    public static final String PROMPT_EVAL_DURATION = "prompt_eval_duration";
+    public static final String EVAL_COUNT = "eval_count";
+    public static final String EVAL_DURATION = "eval_duration";
+
     // API Routes
     public static final String API_GENERATE_ROUTE = "/api/generate";
     public static final String API_CREATE_ROUTE = "/api/create";
@@ -22,9 +30,9 @@ public class OllamaConstants {
     // Endpoints
     public static final String GENERATE_ENDPOINT = "/ollama/generate";
     public static final String GENERATE_STREAM_ENDPOINT = "/ollama/generate/stream";
+    public static final String EMBED_ENDPOINT = "/ollama/embed";
 
     // Field Names
-    // Generate
     public static final String MODEL = "model";
     public static final String PROMPT = "prompt";
     public static final String SUFFIX = "suffix";
@@ -36,6 +44,9 @@ public class OllamaConstants {
     public static final String FORMAT = "format";
     public static final String KEEP_ALIVE = "keep_alive";
     public static final String IMAGES = "images";
+    public static final String INPUT = "input";
+    public static final String TRUNCATE = "truncate";
+    public static final String EMBEDDINGS = "embeddings";
 
     // Options
     public static final String NUM_KEEP = "num_keep";

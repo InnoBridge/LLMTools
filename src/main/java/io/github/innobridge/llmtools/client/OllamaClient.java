@@ -7,7 +7,9 @@ import java.io.IOException;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import io.github.innobridge.llmtools.models.request.EmbedRequest;
 import io.github.innobridge.llmtools.models.request.GenerateRequest;
+import io.github.innobridge.llmtools.models.response.EmbedResponse;
 import io.github.innobridge.llmtools.models.response.GenerateResponse;
 
 /**
@@ -147,7 +149,7 @@ public interface OllamaClient {
      * @param model The name of the model
      * @param prompt The text to generate embeddings for
      */
-    Mono<String> embed(String model, String prompt);
+    Mono<EmbedResponse> embed(EmbedRequest request);
 
     /**
      * List available models.

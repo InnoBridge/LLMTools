@@ -1,26 +1,32 @@
 package io.github.innobridge.llmtools.models.response;
 
+import static io.github.innobridge.llmtools.constants.OllamaConstants.TOTAL_DURATION;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.LOAD_DURATION;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.PROMPT_EVAL_COUNT;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.PROMPT_EVAL_DURATION;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.EVAL_COUNT;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.EVAL_DURATION;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Duration;
 
 public class Metrics {
-
-    @JsonProperty("total_duration")
+    @JsonProperty(TOTAL_DURATION)
     private Duration totalDuration;
 
-    @JsonProperty("load_duration")
+    @JsonProperty(LOAD_DURATION)
     private Duration loadDuration;
 
-    @JsonProperty("prompt_eval_count")
+    @JsonProperty(PROMPT_EVAL_COUNT)
     private int promptEvalCount;
 
-    @JsonProperty("prompt_eval_duration")
+    @JsonProperty(PROMPT_EVAL_DURATION)
     private Duration promptEvalDuration;
 
-    @JsonProperty("eval_count")
+    @JsonProperty(EVAL_COUNT)
     private int evalCount;
 
-    @JsonProperty("eval_duration")
+    @JsonProperty(EVAL_DURATION)
     private Duration evalDuration;
 
     // Getters and Setters

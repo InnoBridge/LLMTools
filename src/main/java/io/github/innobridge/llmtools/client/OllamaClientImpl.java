@@ -24,6 +24,7 @@ import io.github.innobridge.llmtools.models.request.GenerateRequest;
 import io.github.innobridge.llmtools.models.request.PullRequest;
 import io.github.innobridge.llmtools.models.request.PushRequest;
 import io.github.innobridge.llmtools.models.request.ShowRequest;
+import io.github.innobridge.llmtools.models.response.EmbedResponse;
 import io.github.innobridge.llmtools.models.response.GenerateResponse;
 import lombok.extern.slf4j.Slf4j;
 
@@ -238,13 +239,13 @@ public class OllamaClientImpl implements OllamaClient {
     }
 
     @Override
-    public Mono<String> embed(String model, String prompt) {
+    public Mono<EmbedResponse> embed(EmbedRequest request) {
         return webClient.post()
                 .uri(API_EMBED_ROUTE)
                 .contentType(APPLICATION_JSON)
-                .bodyValue(new EmbedRequest(model, prompt))
+                .bodyValue(request)
                 .retrieve()
-                .bodyToMono(String.class);
+                .bodyToMono(EmbedResponse.class);
     }
 
     @Override

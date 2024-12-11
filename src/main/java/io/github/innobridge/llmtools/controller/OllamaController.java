@@ -65,6 +65,13 @@ import static io.github.innobridge.llmtools.constants.OllamaConstants.STOP;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.GENERATE_STREAM_ENDPOINT;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
 
+import io.github.innobridge.llmtools.models.request.EmbedRequest;
+import io.github.innobridge.llmtools.models.response.EmbedResponse;
+
+import static io.github.innobridge.llmtools.constants.OllamaConstants.EMBED_ENDPOINT;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.INPUT;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.TRUNCATE;
+
 @Slf4j
 @RestController
 public class OllamaController {
@@ -230,4 +237,70 @@ public class OllamaController {
          });
     
     }
+
+    @PostMapping(EMBED_ENDPOINT)
+    @Operation(summary = "Generate embeddings from Ollama model")
+    @ApiResponses(value= {
+            @ApiResponse(responseCode = CREATED,
+                    description = "Generate embeddings",
+                    content = @Content(mediaType = CONTENT_TYPE,
+                            schema = @Schema(implementation = EmbedResponse.class)))
+    })
+    public Mono<ResponseEntity<EmbedResponse>> embed(
+        @RequestParam(required = true, value = MODEL) String model,
+        @RequestParam(required = true, value = INPUT) List<String> input,
+        @RequestParam(required = false, value = KEEP_ALIVE) Duration keepAlive,
+        @RequestParam(required = false, value = TRUNCATE) Boolean truncate,
+        @RequestParam(required = false, value = NUM_KEEP) Integer numKeep,
+        @RequestParam(required = false, value = SEED) Integer seed,
+        @RequestParam(required = false, value = NUM_PREDICT) Integer numPredict,
+        @RequestParam(required = false, value = TOP_K) Integer topK,
+        @RequestParam(required = false, value = TOP_P) Float topP,
+        @RequestParam(required = false, value = MIN_P) Float minP,
+        @RequestParam(required = false, value = TFS_Z) Float tfsZ,
+        @RequestParam(required = false, value = TYPICAL_P) Float typicalP,
+        @RequestParam(required = false, value = REPEAT_LAST_N) Integer repeatLastN,
+        @RequestParam(required = false, value = TEMPERATURE) Float temperature,
+        @RequestParam(required = false, value = REPEAT_PENALTY) Float repeatPenalty,
+        @RequestParam(required = false, value = PRESENCE_PENALTY) Float presencePenalty,
+        @RequestParam(required = false, value = FREQUENCY_PENALTY) Float frequencyPenalty,
+        @RequestParam(required = false, value = MIROSTAT) Integer mirostat,
+        @RequestParam(required = false, value = MIROSTAT_TAU) Float mirostatTau,
+        @RequestParam(required = false, value = MIROSTAT_ETA) Float mirostatEta,
+        @RequestParam(required = false, value = PENALIZE_NEWLINE) Boolean penalizeNewline,
+        @RequestParam(required = false, value = STOP) List<String> stop
+    ) {
+        var builder = EmbedRequest.builder()
+            .model(model)
+            .input(input);
+            
+        if (keepAlive != null) builder.keepAlive(keepAlive);
+        if (truncate != null) builder.truncate(truncate);
+        if (numKeep != null) builder.numKeep(numKeep);
+        if (seed != null) builder.seed(seed);
+        if (numPredict != null) builder.numPredict(numPredict);
+        if (topK != null) builder.topK(topK);
+        if (topP != null) builder.topP(topP);
+        if (minP != null) builder.minP(minP);
+        if (tfsZ != null) builder.tfsZ(tfsZ);
+        if (typicalP != null) builder.typicalP(typicalP);
+        if (repeatLastN != null) builder.repeatLastN(repeatLastN);
+        if (temperature != null) builder.temperature(temperature);
+        if (repeatPenalty != null) builder.repeatPenalty(repeatPenalty);
+        if (presencePenalty != null) builder.presencePenalty(presencePenalty);
+        if (frequencyPenalty != null) builder.frequencyPenalty(frequencyPenalty);
+        if (mirostat != null) builder.mirostat(mirostat);
+        if (mirostatTau != null) builder.mirostatTau(mirostatTau);
+        if (mirostatEta != null) builder.mirostatEta(mirostatEta);
+        if (penalizeNewline != null) builder.penalizeNewline(penalizeNewline);
+        if (stop != null) builder.stop(stop);
+
+        return ollamaClient.embed(builder.build())
+            .map(response -> ResponseEntity.ok(response))
+            .onErrorResume(e -> {
+                log.error("Error generating embeddings", e);
+                return Mono.just(ResponseEntity.status(500).body(null));
+            });
+    }
+    
 }

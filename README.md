@@ -678,6 +678,14 @@ Use cases:
 For typical retrieval scenario using embeddings, you can compute distance (such as cosine similarity or Euclidean distance) between the query embedding and the embeddings stored in the vector database.
 The closest embeddings, based on the computed distance, are considered the most relevant results.
 
+Request:
+```bash
+curl http://localhost:11434/api/embed -d '{
+  "model": "qwen:32b",
+  "input": "Why is the sky blue?"
+}'
+```
+
 ## Deprecated [EmbeddingsHander](https://github.com/ollama/ollama/blob/acd7d03266e1b2b1df07c608ba225eb46a57d4cf/server/routes.go#L483)
 ### Deprecated POST /api/embeddings
 ### Deprecated POST /v1/embeddings
