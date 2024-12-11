@@ -70,11 +70,11 @@ public class OllamaClientImpl implements OllamaClient {
     }
 
     @Override
-    public Mono<String> push(String name, String insecure) {
+    public Mono<String> delete(String name) {
         return webClient.post()
-                .uri(API_PUSH_ROUTE)
+                .uri(API_DELETE_ROUTE)
                 .contentType(APPLICATION_JSON)
-                .bodyValue(new PushRequest(name, insecure))
+                .bodyValue(new DeleteRequest(name))
                 .retrieve()
                 .bodyToMono(String.class);
     }
@@ -87,16 +87,6 @@ public class OllamaClientImpl implements OllamaClient {
                 .bodyValue(request)
                 .retrieve()
                 .bodyToMono(Void.class);
-    }
-
-    @Override
-    public Mono<String> delete(String name) {
-        return webClient.post()
-                .uri(API_DELETE_ROUTE)
-                .contentType(APPLICATION_JSON)
-                .bodyValue(new DeleteRequest(name))
-                .retrieve()
-                .bodyToMono(String.class);
     }
 
     @Override
@@ -161,6 +151,31 @@ public class OllamaClientImpl implements OllamaClient {
         request = request.setStream(true);
         return webClient.post()
                 .uri(API_PULL_ROUTE)
+                .contentType(APPLICATION_JSON)
+                .bodyValue(request)
+                .retrieve()
+                .bodyToFlux(ProgressResponse.class)
+                .doOnError(this::handleErrorLogging);
+    }
+
+    @Override
+    public Mono<ProgressResponse> push(PushRequest request) {
+        request = request.setStream(false);
+        return webClient.post()
+                .uri(API_PUSH_ROUTE)
+                .contentType(APPLICATION_JSON)
+                .bodyValue(request)
+                .retrieve()
+                .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), this::handleErrorResponse)
+                .bodyToMono(ProgressResponse.class)
+                .doOnError(this::handleErrorLogging);
+    }
+
+    @Override
+    public Flux<ProgressResponse> pushStream(PushRequest request) {
+        request = request.setStream(true);
+        return webClient.post()
+                .uri(API_PUSH_ROUTE)
                 .contentType(APPLICATION_JSON)
                 .bodyValue(request)
                 .retrieve()

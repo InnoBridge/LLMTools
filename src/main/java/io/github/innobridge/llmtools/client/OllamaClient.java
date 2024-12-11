@@ -11,6 +11,7 @@ import io.github.innobridge.llmtools.models.request.EmbedRequest;
 import io.github.innobridge.llmtools.models.request.GenerateRequest;
 import io.github.innobridge.llmtools.models.request.PullRequest;
 import io.github.innobridge.llmtools.models.request.CopyRequest;
+import io.github.innobridge.llmtools.models.request.PushRequest;
 import io.github.innobridge.llmtools.models.response.EmbedResponse;
 import io.github.innobridge.llmtools.models.response.GenerateResponse;
 import io.github.innobridge.llmtools.models.response.ProgressResponse;
@@ -26,13 +27,6 @@ public interface OllamaClient {
      * @param path The path to the model directory
      */
     Mono<String> create(String name, String modelfile, String path);
-
-    /**
-     * Push a model to a remote registry.
-     * @param name The name of the model to push
-     * @param insecure Allow insecure connections to the registry
-     */
-    Mono<String> push(String name, String insecure);
 
     /**
      * Copy a model.
@@ -87,6 +81,18 @@ public interface OllamaClient {
      * @param request The pull request containing model, username, password, and other parameters
      */
     Flux<ProgressResponse> pullStream(PullRequest request);
+
+    /**
+     * Push a model to a remote registry.
+     * @param request The push request containing model name and other parameters
+     */
+    Mono<ProgressResponse> push(PushRequest request);
+
+    /**
+     * Push a model to a remote registry with streaming support.
+     * @param request The push request containing model name and other parameters
+     */
+    Flux<ProgressResponse> pushStream(PushRequest request);
 
     /**
      * Generate a response from a model.

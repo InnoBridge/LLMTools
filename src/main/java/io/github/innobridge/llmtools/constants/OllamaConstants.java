@@ -34,6 +34,8 @@ public class OllamaConstants {
     public static final String PULL_ENDPOINT = "/ollama/pull";
     public static final String PULL_STREAM_ENDPOINT = "/ollama/pull/stream";
     public static final String COPY_ENDPOINT = "/ollama/copy";
+    public static final String PUSH_ENDPOINT = "/ollama/push";
+    public static final String PUSH_STREAM_ENDPOINT = "/ollama/push/stream";
 
     // Field Names
     public static final String MODEL = "model";
