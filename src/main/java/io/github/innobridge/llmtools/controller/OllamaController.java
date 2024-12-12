@@ -82,8 +82,6 @@ import io.github.innobridge.llmtools.models.request.PushRequest;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.PULL_ENDPOINT;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.PULL_STREAM_ENDPOINT;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.INSECURE;
-import static io.github.innobridge.llmtools.constants.OllamaConstants.USERNAME;
-import static io.github.innobridge.llmtools.constants.OllamaConstants.PASSWORD;
 import static org.springframework.http.MediaType.APPLICATION_NDJSON_VALUE;
 
 import static io.github.innobridge.llmtools.constants.OllamaConstants.COPY_ENDPOINT;
@@ -91,6 +89,8 @@ import static io.github.innobridge.llmtools.constants.OllamaConstants.SOURCE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.DESTINATION;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.PUSH_ENDPOINT;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.PUSH_STREAM_ENDPOINT;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.USERNAME;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.PASSWORD;
 
 @Slf4j
 @RestController
@@ -293,7 +293,6 @@ public class OllamaController {
         var builder = EmbedRequest.builder()
             .model(model)
             .input(input);
-            
         if (keepAlive != null) builder.keepAlive(keepAlive);
         if (truncate != null) builder.truncate(truncate);
         if (numKeep != null) builder.numKeep(numKeep);
@@ -314,7 +313,6 @@ public class OllamaController {
         if (mirostatEta != null) builder.mirostatEta(mirostatEta);
         if (penalizeNewline != null) builder.penalizeNewline(penalizeNewline);
         if (stop != null) builder.stop(stop);
-
         return ollamaClient.embed(builder.build())
             .map(response -> ResponseEntity.ok(response))
             .onErrorResume(e -> {
@@ -401,64 +399,57 @@ public class OllamaController {
                 });
     }
 
-    // Not able to push even using cli got Error: you are not authorized to push to this namespace, create the model under a namespace you own
-    // revisit later
-    // @Operation(summary = "Push a model to remote registry.")
-    // @ApiResponses(value= {
-    //         @ApiResponse(responseCode = CREATED,
-    //                 description = "Push model to remote registry.",
-    //                 content = @Content(mediaType = CONTENT_TYPE,
-    //                         schema = @Schema(implementation = ProgressResponse.class)))
-    //                         })
-    // @PostMapping(PUSH_ENDPOINT)
-    // public Mono<ResponseEntity<ProgressResponse>> pushModel(
-    //     @RequestParam(required = true, value = MODEL) String model,
-    //     @RequestParam(required = false, value = INSECURE) Boolean insecure,
-    //     @RequestParam(required = false, value = USERNAME) String username,
-    //     @RequestParam(required = false, value = PASSWORD) String password
-    // ) {
-    //     var builder = PushRequest.builder()
-    //         .model(model);
-    //     if (insecure != null) builder.insecure(insecure);
-    //     if (username != null) builder.username(username);
-    //     if (password != null) builder.password(password);
+
+    @Operation(summary = "Push a model to remote registry.")
+    @ApiResponses(value= {
+            @ApiResponse(responseCode = CREATED,
+                    description = "Push model to remote registry.",
+                    content = @Content(mediaType = CONTENT_TYPE,
+                            schema = @Schema(implementation = ProgressResponse.class)))
+                            })
+    @PostMapping(PUSH_ENDPOINT)
+    public Mono<ResponseEntity<ProgressResponse>> pushModel(
+        @RequestParam(required = true, value = MODEL) String model,
+        @RequestParam(required = false, value = INSECURE) Boolean insecure
+    ) {
+        var builder = PushRequest.builder()
+            .model(model);
+        if (insecure != null) builder.insecure(insecure);
         
-    //     return ollamaClient.push(builder.build())
-    //         .map(ResponseEntity::ok)
-    //         .onErrorResume(e -> {
-    //             log.error("Error pushing model", e);
-    //             return Mono.just(ResponseEntity.status(500).body(null));
-    //         });
-    // }
+        return ollamaClient.push(builder.build())
+            .map(ResponseEntity::ok)
+            .onErrorResume(e -> {
+                log.error("Error pushing model", e);
+                return Mono.just(ResponseEntity.status(500).body(null));
+            });
+    }
 
-    // @Operation(summary = "Push a model to remote registry with streaming progress.")
-    // @ApiResponses(value= {
-    //         @ApiResponse(responseCode = CREATED,
-    //                 description = "Push model to remote registry with streaming progress.",
-    //                 content = @Content(mediaType = CONTENT_TYPE,
-    //                         schema = @Schema(implementation = ProgressResponse.class)))
-    //                         })
-    // @PostMapping(value = PUSH_STREAM_ENDPOINT, produces = APPLICATION_NDJSON_VALUE)
-    // public Flux<ServerSentEvent<ProgressResponse>> pushModelStream(
-    //     @RequestParam(required = true, value = MODEL) String model,
-    //     @RequestParam(required = false, value = INSECURE) Boolean insecure,
-    //     @RequestParam(required = false, value = USERNAME) String username,
-    //     @RequestParam(required = false, value = PASSWORD) String password
-    // ) {
-    //     var builder = PushRequest.builder()
-    //         .model(model);
-    //     if (insecure != null) builder.insecure(insecure);
-    //     if (username != null) builder.username(username);
-    //     if (password != null) builder.password(password);
-            
-    //     return ollamaClient.pushStream(builder.build())
-    //         .map(response -> ServerSentEvent.<ProgressResponse>builder()
-    //             .data(response)
-    //             .build())
-    //         .onErrorResume(e -> {
-    //             log.error("Error pushing model stream", e);
-    //             return Flux.empty();
-    //         });
-    // }
-
+    @Operation(summary = "Push a model to remote registry with streaming progress.")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = CREATED,
+            description = "Push model to remote registry with streaming progress.",
+            content = @Content(
+                mediaType = TEXT_EVENT_STREAM_VALUE,
+                schema = @Schema(implementation = ProgressResponse.class)
+            )
+        )
+    })
+    @PostMapping(value = PUSH_STREAM_ENDPOINT, produces = TEXT_EVENT_STREAM_VALUE)
+    public Flux<ServerSentEvent<ProgressResponse>> pushModelStream(
+        @RequestParam(required = true, value = MODEL) String model,
+        @RequestParam(required = false, value = INSECURE) Boolean insecure
+    ) {
+        var builder = PushRequest.builder()
+            .model(model);
+        if (insecure != null) builder.insecure(insecure);
+        return ollamaClient.pushStream(builder.build())
+            .map(response -> ServerSentEvent.<ProgressResponse>builder()
+                .data(response)
+                .build())
+            .onErrorResume(e -> {
+                log.error("Error pushing model stream", e);
+                return Flux.empty();
+            });
+    }
 }

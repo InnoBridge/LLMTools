@@ -53,14 +53,14 @@ public class OllamaConstants {
     public static final String TRUNCATE = "truncate";
     public static final String EMBEDDINGS = "embeddings";
     public static final String INSECURE = "insecure";
-    public static final String USERNAME = "username";
-    public static final String PASSWORD = "password";
     public static final String STATUS = "status";
     public static final String DIGEST = "digest";
     public static final String TOTAL = "total";
     public static final String COMPLETED = "completed";
     public static final String SOURCE = "source";
     public static final String DESTINATION = "destination";
+    public static final String USERNAME = "username";
+    public static final String PASSWORD = "password";
     
     // Options
     public static final String NUM_KEEP = "num_keep";
