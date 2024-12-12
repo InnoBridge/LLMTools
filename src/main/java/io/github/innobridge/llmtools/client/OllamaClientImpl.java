@@ -60,13 +60,29 @@ public class OllamaClientImpl implements OllamaClient {
     }
 
     @Override
-    public Mono<String> create(String name, String modelfile, String path) {
+    public Mono<ProgressResponse> create(CreateRequest request) {
+        request.setStream(false);
         return webClient.post()
                 .uri(API_CREATE_ROUTE)
                 .contentType(APPLICATION_JSON)
-                .bodyValue(new CreateRequest(name, modelfile, path))
+                .bodyValue(request)
                 .retrieve()
-                .bodyToMono(String.class);
+                .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), this::handleErrorResponse)
+                .bodyToMono(ProgressResponse.class)
+                .doOnError(this::handleErrorLogging);
+    }
+
+    @Override
+    public Flux<ProgressResponse> createStream(CreateRequest request) {
+        request.setStream(true);
+        return webClient.post()
+                .uri(API_CREATE_ROUTE)
+                .contentType(APPLICATION_JSON)
+                .bodyValue(request)
+                .retrieve()
+                .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), this::handleErrorResponse)
+                .bodyToFlux(ProgressResponse.class)
+                .doOnError(this::handleErrorLogging);
     }
 
     @Override

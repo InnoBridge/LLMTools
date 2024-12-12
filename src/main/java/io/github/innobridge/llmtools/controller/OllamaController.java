@@ -78,6 +78,7 @@ import io.github.innobridge.llmtools.models.request.CopyRequest;
 import io.github.innobridge.llmtools.models.request.PullRequest;
 import io.github.innobridge.llmtools.models.request.PullRequest.PullRequestBuilder;
 import io.github.innobridge.llmtools.models.request.PushRequest;
+import io.github.innobridge.llmtools.models.request.CreateRequest;
 
 import static io.github.innobridge.llmtools.constants.OllamaConstants.PULL_ENDPOINT;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.PULL_STREAM_ENDPOINT;
@@ -91,6 +92,11 @@ import static io.github.innobridge.llmtools.constants.OllamaConstants.PUSH_ENDPO
 import static io.github.innobridge.llmtools.constants.OllamaConstants.PUSH_STREAM_ENDPOINT;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.USERNAME;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.PASSWORD;
+
+import static io.github.innobridge.llmtools.constants.OllamaConstants.CREATE_ENDPOINT;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.CREATE_STREAM_ENDPOINT;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.MODELFILE;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.QUANTIZE;
 
 @Slf4j
 @RestController
@@ -450,6 +456,67 @@ public class OllamaController {
             .onErrorResume(e -> {
                 log.error("Error pushing model stream", e);
                 return Flux.empty();
-            });
+            });        
+    }
+
+    @Operation(summary = "Create a model from a Modelfile")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = CREATED,
+                    description = "Model created successfully",
+                    content = @Content(mediaType = CONTENT_TYPE,
+                            schema = @Schema(implementation = ProgressResponse.class)))
+    })
+    @PostMapping(CREATE_ENDPOINT)
+    public Mono<ResponseEntity<ProgressResponse>> create(
+            @RequestParam(required = true, value = MODEL) String model,
+            @RequestParam(required = false, value = MODELFILE) String modelfile,
+            @RequestParam(required = false, value = QUANTIZE) String quantize) {
+        
+        var builder = CreateRequest.builder(model);
+        if (modelfile != null) builder.modelfile(modelfile);
+        if (quantize != null) builder.quantize(quantize);
+
+        // return ollamaClient.create(builder.build())
+                // .map(ResponseEntity::ok)
+                // .onErrorResume(e -> {
+                    // log.error("Error creating model", e);
+                    // return Mono.just(ResponseEntity.status(500).body(null));
+                // });
+
+        ResponseEntity<ProgressResponse> response = ollamaClient.create(builder.build())
+            .map(ResponseEntity::ok)
+            .onErrorResume(e -> Mono.just(ResponseEntity.status(500).body(
+                new ProgressResponse(e.getMessage(), null, null, null)
+            )))
+            .block();
+                
+        return Mono.just(response);
+    }
+
+    @Operation(summary = "Create a model from a Modelfile with streaming progress")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = CREATED,
+                    description = "Model creation progress stream",
+                    content = @Content(mediaType = TEXT_EVENT_STREAM_VALUE,
+                            schema = @Schema(implementation = ProgressResponse.class)))
+    })
+    @PostMapping(value = CREATE_STREAM_ENDPOINT, produces = TEXT_EVENT_STREAM_VALUE)
+    public Flux<ServerSentEvent<ProgressResponse>> createStream(
+            @RequestParam(required = true, value = MODEL) String model,
+            @RequestParam(required = false, value = MODELFILE) String modelfile,
+            @RequestParam(required = false, value = QUANTIZE) String quantize) {
+        
+        var builder = CreateRequest.builder(model);
+        if (modelfile != null) builder.modelfile(modelfile);
+        if (quantize != null) builder.quantize(quantize);
+
+        return ollamaClient.createStream(builder.build())
+                .map(response -> ServerSentEvent.<ProgressResponse>builder()
+                        .data(response)
+                        .build())
+                .onErrorResume(e -> {
+                    log.error("Error creating model stream", e);
+                    return Flux.empty();
+                });
     }
 }

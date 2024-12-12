@@ -30,6 +30,8 @@ public class OllamaConstants {
     // Endpoints
     public static final String GENERATE_ENDPOINT = "/ollama/generate";
     public static final String GENERATE_STREAM_ENDPOINT = "/ollama/generate/stream";
+    public static final String CREATE_ENDPOINT = "/ollama/create";
+    public static final String CREATE_STREAM_ENDPOINT = "/ollama/create/stream";
     public static final String EMBED_ENDPOINT = "/ollama/embed";
     public static final String PULL_ENDPOINT = "/ollama/pull";
     public static final String PULL_STREAM_ENDPOINT = "/ollama/pull/stream";
@@ -61,6 +63,8 @@ public class OllamaConstants {
     public static final String DESTINATION = "destination";
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";
+    public static final String MODELFILE = "modelfile";
+    public static final String QUANTIZE = "quantize";
     
     // Options
     public static final String NUM_KEEP = "num_keep";

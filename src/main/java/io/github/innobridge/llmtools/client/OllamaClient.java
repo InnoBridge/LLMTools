@@ -11,6 +11,7 @@ import io.github.innobridge.llmtools.models.request.EmbedRequest;
 import io.github.innobridge.llmtools.models.request.GenerateRequest;
 import io.github.innobridge.llmtools.models.request.PullRequest;
 import io.github.innobridge.llmtools.models.request.CopyRequest;
+import io.github.innobridge.llmtools.models.request.CreateRequest;
 import io.github.innobridge.llmtools.models.request.PushRequest;
 import io.github.innobridge.llmtools.models.response.EmbedResponse;
 import io.github.innobridge.llmtools.models.response.GenerateResponse;
@@ -22,11 +23,15 @@ import io.github.innobridge.llmtools.models.response.ProgressResponse;
 public interface OllamaClient {
     /**
      * Create a model from a Modelfile.
-     * @param name The name of the model to create
-     * @param modelfile The contents of the Modelfile
-     * @param path The path to the model directory
+     * @param request The create request containing model name, modelfile contents, and path
      */
-    Mono<String> create(String name, String modelfile, String path);
+    Mono<ProgressResponse> create(CreateRequest request);
+
+    /**
+     * Create a model from a Modelfile with streaming support.
+     * @param request The create request containing model name, modelfile contents, and path
+     */
+    Flux<ProgressResponse> createStream(CreateRequest request);
 
     /**
      * Copy a model.
