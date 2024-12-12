@@ -440,24 +440,25 @@ public class OllamaController {
     //                         })
     // @PostMapping(value = PUSH_STREAM_ENDPOINT, produces = APPLICATION_NDJSON_VALUE)
     // public Flux<ServerSentEvent<ProgressResponse>> pushModelStream(
-        @RequestParam(required = true, value = MODEL) String model,
-        @RequestParam(required = false, value = INSECURE) Boolean insecure,
-        @RequestParam(required = false, value = USERNAME) String username,
-        @RequestParam(required = false, value = PASSWORD) String password
-    ) {
-        var builder = PushRequest.builder()
-            .model(model);
-        if (insecure != null) builder.insecure(insecure);
-        if (username != null) builder.username(username);
-        if (password != null) builder.password(password);
+    //     @RequestParam(required = true, value = MODEL) String model,
+    //     @RequestParam(required = false, value = INSECURE) Boolean insecure,
+    //     @RequestParam(required = false, value = USERNAME) String username,
+    //     @RequestParam(required = false, value = PASSWORD) String password
+    // ) {
+    //     var builder = PushRequest.builder()
+    //         .model(model);
+    //     if (insecure != null) builder.insecure(insecure);
+    //     if (username != null) builder.username(username);
+    //     if (password != null) builder.password(password);
             
-        return ollamaClient.pushStream(builder.build())
-            .map(response -> ServerSentEvent.<ProgressResponse>builder()
-                .data(response)
-                .build())
-            .onErrorResume(e -> {
-                log.error("Error pushing model stream", e);
-                return Flux.empty();
-            });
-    }
+    //     return ollamaClient.pushStream(builder.build())
+    //         .map(response -> ServerSentEvent.<ProgressResponse>builder()
+    //             .data(response)
+    //             .build())
+    //         .onErrorResume(e -> {
+    //             log.error("Error pushing model stream", e);
+    //             return Flux.empty();
+    //         });
+    // }
+
 }
