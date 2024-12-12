@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -79,6 +80,7 @@ import io.github.innobridge.llmtools.models.request.PullRequest;
 import io.github.innobridge.llmtools.models.request.PullRequest.PullRequestBuilder;
 import io.github.innobridge.llmtools.models.request.PushRequest;
 import io.github.innobridge.llmtools.models.request.CreateRequest;
+import io.github.innobridge.llmtools.models.request.DeleteRequest;
 
 import static io.github.innobridge.llmtools.constants.OllamaConstants.PULL_ENDPOINT;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.PULL_STREAM_ENDPOINT;
@@ -97,6 +99,9 @@ import static io.github.innobridge.llmtools.constants.OllamaConstants.CREATE_END
 import static io.github.innobridge.llmtools.constants.OllamaConstants.CREATE_STREAM_ENDPOINT;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.MODELFILE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.QUANTIZE;
+
+import static io.github.innobridge.llmtools.constants.OllamaConstants.DELETE_ENDPOINT;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.NAME;
 
 @Slf4j
 @RestController
@@ -517,6 +522,25 @@ public class OllamaController {
                 .onErrorResume(e -> {
                     log.error("Error creating model stream", e);
                     return Flux.empty();
+                });
+    }
+
+   @Operation(summary = "Delete a model")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = CREATED,
+                    description = "Model deleted successfully",
+                     content = @Content(mediaType = CONTENT_TYPE))
+    })
+    @DeleteMapping(DELETE_ENDPOINT)
+    public Mono<ResponseEntity<Object>> deleteModel(
+            @RequestParam(required = true, value = NAME) String name) {
+        
+        DeleteRequest deleteRequest = new DeleteRequest(name);
+        return ollamaClient.delete(deleteRequest)
+                .then(Mono.just(ResponseEntity.ok().build()))
+                .onErrorResume(e -> {
+                    log.error("Error deleting model", e);
+                    return Mono.just(ResponseEntity.status(500).build());
                 });
     }
 }

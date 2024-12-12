@@ -27,6 +27,9 @@ import io.github.innobridge.llmtools.models.response.ProgressResponse;
 import lombok.extern.slf4j.Slf4j;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+
+import org.springframework.http.HttpMethod;
+
 import static io.github.innobridge.llmtools.constants.OllamaConstants.API_GENERATE_ROUTE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.API_CREATE_ROUTE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.API_PUSH_ROUTE;
@@ -86,13 +89,13 @@ public class OllamaClientImpl implements OllamaClient {
     }
 
     @Override
-    public Mono<String> delete(String name) {
-        return webClient.post()
+    public Mono<Void> delete(DeleteRequest request) {
+        return webClient.method(HttpMethod.DELETE)
                 .uri(API_DELETE_ROUTE)
                 .contentType(APPLICATION_JSON)
-                .bodyValue(new DeleteRequest(name))
+                .bodyValue(request)
                 .retrieve()
-                .bodyToMono(String.class);
+                .bodyToMono(Void.class);
     }
 
     @Override

@@ -38,8 +38,10 @@ public class OllamaConstants {
     public static final String COPY_ENDPOINT = "/ollama/copy";
     public static final String PUSH_ENDPOINT = "/ollama/push";
     public static final String PUSH_STREAM_ENDPOINT = "/ollama/push/stream";
+    public static final String DELETE_ENDPOINT = "/ollama/delete";  // Add this line
 
     // Field Names
+    public static final String NAME = "name";
     public static final String MODEL = "model";
     public static final String PROMPT = "prompt";
     public static final String SUFFIX = "suffix";
