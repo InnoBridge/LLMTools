@@ -38,7 +38,8 @@ public class OllamaConstants {
     public static final String COPY_ENDPOINT = "/ollama/copy";
     public static final String PUSH_ENDPOINT = "/ollama/push";
     public static final String PUSH_STREAM_ENDPOINT = "/ollama/push/stream";
-    public static final String DELETE_ENDPOINT = "/ollama/delete";  // Add this line
+    public static final String DELETE_ENDPOINT = "/ollama/delete";
+    public static final String SHOW_ENDPOINT = "/ollama/show";
 
     // Field Names
     public static final String NAME = "name";
@@ -93,5 +94,22 @@ public class OllamaConstants {
     public static final String RESPONSE = "response";
     public static final String DONE = "done";
     public static final String DONE_REASON = "done_reason";
-
+    public static final String ROLE = "role";
+    public static final String CONTENT = "content";
+    public static final String TOOL_CALLS = "tool_calls";
+    public static final String FUNCTION = "function";
+    public static final String INDEX = "index";
+    public static final String ARGUMENTS = "arguments";
+    public static final String MESSAGES = "messages";
+    public static final String DETAILS = "details";
+    public static final String FAMILIES = "families";
+    public static final String MODIFIED_AT = "modified_at";
+    public static final String PARENT_MODEL = "parent_model";
+    public static final String PARAMETER_SIZE = "parameter_size";
+    public static final String QUANTIZATION_LEVEL = "quantization_level";
+    public static final String MODEL_INFO = "model_info";
+    public static final String PROJECTOR_INFO = "projector_info";
+    public static final String FAMILY = "family";
+    public static final String LICENSE = "license";
+    public static final String PARAMETERS = "parameters";
 }

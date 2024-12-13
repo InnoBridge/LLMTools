@@ -81,6 +81,8 @@ import io.github.innobridge.llmtools.models.request.PullRequest.PullRequestBuild
 import io.github.innobridge.llmtools.models.request.PushRequest;
 import io.github.innobridge.llmtools.models.request.CreateRequest;
 import io.github.innobridge.llmtools.models.request.DeleteRequest;
+import io.github.innobridge.llmtools.models.request.ShowRequest;
+import io.github.innobridge.llmtools.models.response.ShowResponse;
 
 import static io.github.innobridge.llmtools.constants.OllamaConstants.PULL_ENDPOINT;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.PULL_STREAM_ENDPOINT;
@@ -102,6 +104,7 @@ import static io.github.innobridge.llmtools.constants.OllamaConstants.QUANTIZE;
 
 import static io.github.innobridge.llmtools.constants.OllamaConstants.DELETE_ENDPOINT;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.NAME;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.SHOW_ENDPOINT;
 
 @Slf4j
 @RestController
@@ -481,13 +484,6 @@ public class OllamaController {
         if (modelfile != null) builder.modelfile(modelfile);
         if (quantize != null) builder.quantize(quantize);
 
-        // return ollamaClient.create(builder.build())
-                // .map(ResponseEntity::ok)
-                // .onErrorResume(e -> {
-                    // log.error("Error creating model", e);
-                    // return Mono.just(ResponseEntity.status(500).body(null));
-                // });
-
         ResponseEntity<ProgressResponse> response = ollamaClient.create(builder.build())
             .map(ResponseEntity::ok)
             .onErrorResume(e -> Mono.just(ResponseEntity.status(500).body(
@@ -541,6 +537,33 @@ public class OllamaController {
                 .onErrorResume(e -> {
                     log.error("Error deleting model", e);
                     return Mono.just(ResponseEntity.status(500).build());
+                });
+    }
+
+    @Operation(summary = "Show model information")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = CREATED,
+                    description = "Show model information",
+                    content = @Content(mediaType = CONTENT_TYPE,
+                            schema = @Schema(implementation = ShowResponse.class)))
+    })
+    @PostMapping(SHOW_ENDPOINT)
+    public Mono<ResponseEntity<ShowResponse>> showModel(
+            @RequestParam(required = true, value = MODEL) String model,
+            @RequestParam(required = false, value = SYSTEM) String system,
+            @RequestParam(required = false, value = RAW, defaultValue = "false") boolean verbose) {
+        
+        var showRequest = ShowRequest.builder()
+            .model(model);
+        if (system != null) showRequest.system(system);
+        // verbose will always have a value due to defaultValue = "false"
+        showRequest.verbose(verbose);
+            
+        return ollamaClient.show(showRequest.build())
+                .map(response -> ResponseEntity.ok(response))
+                .onErrorResume(e -> {
+                    log.error("Error showing model information", e);
+                    return Mono.just(ResponseEntity.status(500).body(null));
                 });
     }
 }

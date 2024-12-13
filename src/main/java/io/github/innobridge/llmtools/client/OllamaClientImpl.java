@@ -24,6 +24,7 @@ import io.github.innobridge.llmtools.models.request.ShowRequest;
 import io.github.innobridge.llmtools.models.response.EmbedResponse;
 import io.github.innobridge.llmtools.models.response.GenerateResponse;
 import io.github.innobridge.llmtools.models.response.ProgressResponse;
+import io.github.innobridge.llmtools.models.response.ShowResponse;
 import lombok.extern.slf4j.Slf4j;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -109,13 +110,13 @@ public class OllamaClientImpl implements OllamaClient {
     }
 
     @Override
-    public Mono<String> show(String name) {
+    public Mono<ShowResponse> show(ShowRequest request) {
         return webClient.post()
                 .uri(API_SHOW_ROUTE)
                 .contentType(APPLICATION_JSON)
-                .bodyValue(new ShowRequest(name))
+                .bodyValue(request)
                 .retrieve()
-                .bodyToMono(String.class);
+                .bodyToMono(ShowResponse.class);
     }
 
     @Override

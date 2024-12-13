@@ -14,9 +14,11 @@ import io.github.innobridge.llmtools.models.request.CopyRequest;
 import io.github.innobridge.llmtools.models.request.CreateRequest;
 import io.github.innobridge.llmtools.models.request.PushRequest;
 import io.github.innobridge.llmtools.models.request.DeleteRequest;
+import io.github.innobridge.llmtools.models.request.ShowRequest;
 import io.github.innobridge.llmtools.models.response.EmbedResponse;
 import io.github.innobridge.llmtools.models.response.GenerateResponse;
 import io.github.innobridge.llmtools.models.response.ProgressResponse;
+import io.github.innobridge.llmtools.models.response.ShowResponse;
 
 /**
  * Interface for interacting with the Ollama API.
@@ -48,9 +50,9 @@ public interface OllamaClient {
 
     /**
      * Show details about a model.
-     * @param name The name of the model
+     * @param request The show request containing the model name
      */
-    Mono<String> show(String name);
+    Mono<ShowResponse> show(ShowRequest request);
 
     /**
      * Get model information.
