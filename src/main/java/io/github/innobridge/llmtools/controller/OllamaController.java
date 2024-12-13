@@ -10,9 +10,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpServerErrorException.InternalServerError;
 import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -108,6 +111,7 @@ import static io.github.innobridge.llmtools.constants.OllamaConstants.NAME;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.SHOW_ENDPOINT;
 
 import static io.github.innobridge.llmtools.constants.OllamaConstants.LIST_MODELS_ENDPOINT;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.BLOB_ENDPOINT;
 
 @Slf4j
 @RestController
@@ -586,4 +590,24 @@ public class OllamaController {
                     return Mono.just(ResponseEntity.status(500).body(null));
                 });
     }
+
+    @Operation(summary = "Check if blob exists")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Blob exists"),
+            @ApiResponse(responseCode = "404",
+                    description = "Blob does not exist")
+    })
+    @RequestMapping(value = BLOB_ENDPOINT + "/{digest}", method = RequestMethod.HEAD)
+    public Mono<?> getBlob(@PathVariable String digest) {
+        return ollamaClient.headBlob(digest)
+            .map((Boolean exists) -> exists
+                ? ResponseEntity.ok().build()
+                : ResponseEntity.notFound().build())
+            .onErrorResume(e -> {
+                log.error("Error checking blob", e);
+                return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+            });
+    }
+    
 }

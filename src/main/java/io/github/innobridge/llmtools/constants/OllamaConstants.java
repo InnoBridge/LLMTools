@@ -40,6 +40,7 @@ public class OllamaConstants {
     public static final String DELETE_ENDPOINT = "/ollama/delete";
     public static final String SHOW_ENDPOINT = "/ollama/show";
     public static final String LIST_MODELS_ENDPOINT = "/ollama/tags";
+    public static final String BLOB_ENDPOINT = "/ollama/blob";
 
     // Field Names
     public static final String NAME = "name";
