@@ -207,8 +207,6 @@ Response
 }
 ```
 
-### GET /v1/models/:model
-
 ## [CreateBlobHandler](https://github.com/ollama/ollama/blob/acd7d03266e1b2b1df07c608ba225eb46a57d4cf/server/routes.go#L1001)
 ### POST /api/blob:digest
 
@@ -691,7 +689,6 @@ curl http://localhost:11434/api/embed -d '{
 ### Deprecated POST /v1/embeddings
 
 ## [ListHandler](https://github.com/ollama/ollama/blob/acd7d03266e1b2b1df07c608ba225eb46a57d4cf/server/routes.go#L897)
-### GET /v1/models
 ### GET /api/tags
 List models that are locally available
 Request

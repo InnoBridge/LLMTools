@@ -16,7 +16,6 @@ public class OllamaConstants {
     public static final String API_COPY_ROUTE = "/api/copy";
     public static final String API_DELETE_ROUTE = "/api/delete";
     public static final String API_SHOW_ROUTE = "/api/show";
-    public static final String V1_MODELS_ROUTE = "/v1/models";
     public static final String API_BLOBS_ROUTE = "/api/blobs";
     public static final String API_PS_ROUTE = "/api/ps";
     public static final String API_PULL_ROUTE = "/api/pull";
@@ -40,6 +39,7 @@ public class OllamaConstants {
     public static final String PUSH_STREAM_ENDPOINT = "/ollama/push/stream";
     public static final String DELETE_ENDPOINT = "/ollama/delete";
     public static final String SHOW_ENDPOINT = "/ollama/show";
+    public static final String LIST_MODELS_ENDPOINT = "/ollama/tags";
 
     // Field Names
     public static final String NAME = "name";
@@ -92,7 +92,9 @@ public class OllamaConstants {
     // Response Fields
     public static final String CREATED_AT = "created_at";
     public static final String RESPONSE = "response";
+    public static final String SIZE = "size";
     public static final String DONE = "done";
+    public static final String MODELS = "models";
     public static final String DONE_REASON = "done_reason";
     public static final String ROLE = "role";
     public static final String CONTENT = "content";

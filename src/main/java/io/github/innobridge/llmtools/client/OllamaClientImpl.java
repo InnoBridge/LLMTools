@@ -23,6 +23,7 @@ import io.github.innobridge.llmtools.models.request.PushRequest;
 import io.github.innobridge.llmtools.models.request.ShowRequest;
 import io.github.innobridge.llmtools.models.response.EmbedResponse;
 import io.github.innobridge.llmtools.models.response.GenerateResponse;
+import io.github.innobridge.llmtools.models.response.ListResponse;
 import io.github.innobridge.llmtools.models.response.ProgressResponse;
 import io.github.innobridge.llmtools.models.response.ShowResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +38,6 @@ import static io.github.innobridge.llmtools.constants.OllamaConstants.API_PUSH_R
 import static io.github.innobridge.llmtools.constants.OllamaConstants.API_COPY_ROUTE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.API_DELETE_ROUTE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.API_SHOW_ROUTE;
-import static io.github.innobridge.llmtools.constants.OllamaConstants.V1_MODELS_ROUTE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.API_BLOBS_ROUTE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.API_PS_ROUTE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.API_PULL_ROUTE;
@@ -117,14 +117,6 @@ public class OllamaClientImpl implements OllamaClient {
                 .bodyValue(request)
                 .retrieve()
                 .bodyToMono(ShowResponse.class);
-    }
-
-    @Override
-    public Mono<String> getModel(String model) {
-        return webClient.get()
-                .uri(V1_MODELS_ROUTE + "/{model}", model)
-                .retrieve()
-                .bodyToMono(String.class);
     }
 
     @Override
@@ -294,19 +286,11 @@ public class OllamaClientImpl implements OllamaClient {
     }
 
     @Override
-    public Mono<String> listModels() {
-        return webClient.get()
-                .uri(V1_MODELS_ROUTE)
-                .retrieve()
-                .bodyToMono(String.class);
-    }
-
-    @Override
-    public Mono<String> listTags() {
+    public Mono<ListResponse> listModels() {
         return webClient.get()
                 .uri(API_TAGS_ROUTE)
                 .retrieve()
-                .bodyToMono(String.class);
+                .bodyToMono(ListResponse.class);
     }
 
     @Override

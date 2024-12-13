@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.github.innobridge.llmtools.client.OllamaClient;
 import io.github.innobridge.llmtools.models.request.GenerateRequest;
 import io.github.innobridge.llmtools.models.response.GenerateResponse;
+import io.github.innobridge.llmtools.models.response.ListResponse;
 import io.github.innobridge.llmtools.models.response.ProgressResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -105,6 +106,8 @@ import static io.github.innobridge.llmtools.constants.OllamaConstants.QUANTIZE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.DELETE_ENDPOINT;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.NAME;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.SHOW_ENDPOINT;
+
+import static io.github.innobridge.llmtools.constants.OllamaConstants.LIST_MODELS_ENDPOINT;
 
 @Slf4j
 @RestController
@@ -563,6 +566,23 @@ public class OllamaController {
                 .map(response -> ResponseEntity.ok(response))
                 .onErrorResume(e -> {
                     log.error("Error showing model information", e);
+                    return Mono.just(ResponseEntity.status(500).body(null));
+                });
+    }
+
+    @Operation(summary = "List available models")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "List of available models",
+                    content = @Content(mediaType = CONTENT_TYPE,
+                            schema = @Schema(implementation = ListResponse.class)))
+    })
+    @GetMapping(LIST_MODELS_ENDPOINT)
+    public Mono<ResponseEntity<ListResponse>> listModels() {
+        return ollamaClient.listModels()
+                .map(ResponseEntity::ok)
+                .onErrorResume(e -> {
+                    log.error("Error listing models", e);
                     return Mono.just(ResponseEntity.status(500).body(null));
                 });
     }

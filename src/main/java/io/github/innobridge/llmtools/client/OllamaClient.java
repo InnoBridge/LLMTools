@@ -17,6 +17,7 @@ import io.github.innobridge.llmtools.models.request.DeleteRequest;
 import io.github.innobridge.llmtools.models.request.ShowRequest;
 import io.github.innobridge.llmtools.models.response.EmbedResponse;
 import io.github.innobridge.llmtools.models.response.GenerateResponse;
+import io.github.innobridge.llmtools.models.response.ListResponse;
 import io.github.innobridge.llmtools.models.response.ProgressResponse;
 import io.github.innobridge.llmtools.models.response.ShowResponse;
 
@@ -53,12 +54,6 @@ public interface OllamaClient {
      * @param request The show request containing the model name
      */
     Mono<ShowResponse> show(ShowRequest request);
-
-    /**
-     * Get model information.
-     * @param model The name of the model
-     */
-    Mono<String> getModel(String model);
 
     /**
      * Create a blob.
@@ -175,12 +170,7 @@ public interface OllamaClient {
     /**
      * List available models.
      */
-    Mono<String> listModels();
-
-    /**
-     * List available model tags.
-     */
-    Mono<String> listTags();
+    Mono<ListResponse> listModels();
 
     /**
      * Get API version.
