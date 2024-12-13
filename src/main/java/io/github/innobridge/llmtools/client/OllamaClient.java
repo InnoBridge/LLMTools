@@ -20,6 +20,7 @@ import io.github.innobridge.llmtools.models.response.GenerateResponse;
 import io.github.innobridge.llmtools.models.response.ListResponse;
 import io.github.innobridge.llmtools.models.response.ProgressResponse;
 import io.github.innobridge.llmtools.models.response.ShowResponse;
+import io.github.innobridge.llmtools.models.response.ListProcessModelResponse;
 
 /**
  * Interface for interacting with the Ollama API.
@@ -60,7 +61,7 @@ public interface OllamaClient {
      * @param digest The digest of the blob
      * @param file The file to upload
      */
-    Mono<String> createBlob(String digest, MultipartFile file);
+    // Mono<String> createBlob(String digest, MultipartFile file);
 
     /**
      * Check if a blob exists.
@@ -71,7 +72,7 @@ public interface OllamaClient {
     /**
      * List running models.
      */
-    Mono<String> ps();
+    Mono<ListProcessModelResponse> ps();
 
     /**
      * Pull a model from a registry.

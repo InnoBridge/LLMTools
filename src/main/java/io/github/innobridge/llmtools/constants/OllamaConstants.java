@@ -41,6 +41,7 @@ public class OllamaConstants {
     public static final String SHOW_ENDPOINT = "/ollama/show";
     public static final String LIST_MODELS_ENDPOINT = "/ollama/tags";
     public static final String BLOB_ENDPOINT = "/ollama/blob";
+    public static final String LIST_RUNNING_MODELS_ENDPOINT = "/ollama/ps";
 
     // Field Names
     public static final String NAME = "name";
@@ -115,4 +116,6 @@ public class OllamaConstants {
     public static final String FAMILY = "family";
     public static final String LICENSE = "license";
     public static final String PARAMETERS = "parameters";
+    public static final String EXPIRES_AT = "expires_at";
+    public static final String SIZE_VRAM = "size_vram";
 }

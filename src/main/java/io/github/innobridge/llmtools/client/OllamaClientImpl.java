@@ -26,6 +26,7 @@ import io.github.innobridge.llmtools.models.response.GenerateResponse;
 import io.github.innobridge.llmtools.models.response.ListResponse;
 import io.github.innobridge.llmtools.models.response.ProgressResponse;
 import io.github.innobridge.llmtools.models.response.ShowResponse;
+import io.github.innobridge.llmtools.models.response.ListProcessModelResponse;
 import lombok.extern.slf4j.Slf4j;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -119,9 +120,9 @@ public class OllamaClientImpl implements OllamaClient {
                 .bodyToMono(ShowResponse.class);
     }
 
-    @Override
-    public Mono<String> createBlob(String digest, MultipartFile file) {
-        return null;
+    // @Override
+    // public Mono<String> createBlob(String digest, MultipartFile file) {
+        // return null;
         // return DataBufferUtils.join(file.getResource().getContent())
         //         .flatMap(dataBuffer -> webClient.post()
         //                 .uri(API_BLOBS_ROUTE + "/{digest}", digest)
@@ -129,7 +130,7 @@ public class OllamaClientImpl implements OllamaClient {
         //                 .bodyValue(dataBuffer)
         //                 .retrieve()
         //                 .bodyToMono(String.class));
-    }
+    // }
 
     @Override
     public Mono<Boolean> headBlob(String digest) {
@@ -139,11 +140,11 @@ public class OllamaClientImpl implements OllamaClient {
     }
 
     @Override
-    public Mono<String> ps() {
+    public Mono<ListProcessModelResponse> ps() {
         return webClient.get()
                 .uri(API_PS_ROUTE)
                 .retrieve()
-                .bodyToMono(String.class);
+                .bodyToMono(ListProcessModelResponse.class);
     }
 
     @Override

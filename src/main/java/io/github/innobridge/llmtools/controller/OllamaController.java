@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.github.innobridge.llmtools.client.OllamaClient;
 import io.github.innobridge.llmtools.models.request.GenerateRequest;
 import io.github.innobridge.llmtools.models.response.GenerateResponse;
+import io.github.innobridge.llmtools.models.response.ListProcessModelResponse;
 import io.github.innobridge.llmtools.models.response.ListResponse;
 import io.github.innobridge.llmtools.models.response.ProgressResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -112,6 +113,7 @@ import static io.github.innobridge.llmtools.constants.OllamaConstants.SHOW_ENDPO
 
 import static io.github.innobridge.llmtools.constants.OllamaConstants.LIST_MODELS_ENDPOINT;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.BLOB_ENDPOINT;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.LIST_RUNNING_MODELS_ENDPOINT;
 
 @Slf4j
 @RestController
@@ -599,7 +601,7 @@ public class OllamaController {
                     description = "Blob does not exist")
     })
     @RequestMapping(value = BLOB_ENDPOINT + "/{digest}", method = RequestMethod.HEAD)
-    public Mono<?> getBlob(@PathVariable String digest) {
+    public Mono<?> headBlob(@PathVariable String digest) {
         return ollamaClient.headBlob(digest)
             .map((Boolean exists) -> exists
                 ? ResponseEntity.ok().build()
@@ -609,5 +611,25 @@ public class OllamaController {
                 return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
             });
     }
-    
+
+    // createBlob
+
+    @Operation(summary = "List running models")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "List of running models",
+                    content = @Content(mediaType = CONTENT_TYPE,
+                            schema = @Schema(implementation = ListProcessModelResponse.class)))
+    })
+    @GetMapping(LIST_RUNNING_MODELS_ENDPOINT)
+    public Mono<ResponseEntity<ListProcessModelResponse>> listRunningModels() {
+        return ollamaClient.ps()
+                .map(ResponseEntity::ok)
+                .onErrorResume(e -> {
+                    log.error("Error listing running models", e);
+                    return Mono.just(ResponseEntity.status(500).body(null));
+                });
+    }
+
+    // chat
 }
