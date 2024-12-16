@@ -34,6 +34,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(Include.NON_NULL)
+/**
+ * Represents a request for a chat interaction, including model, messages, and other options.
+ */
 public class ChatRequest extends Options {
     @NotNull
     @JsonProperty(MODEL)
@@ -55,10 +58,18 @@ public class ChatRequest extends Options {
     @JsonProperty(TOOLS)
     private List<Tool> tools;
 
-    
-   
+    /**
+     * Custom deserializer for the format field, which can be either a string or a JSON object.
+     */
     public static class FormatDeserializer extends JsonDeserializer<String> {
         private static final ObjectMapper objectMapper = new ObjectMapper();
+
+        /**
+         * Default constructor for FormatDeserializer.
+         */
+        public FormatDeserializer() {
+            super();
+        }
 
         @Override
         public String deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
