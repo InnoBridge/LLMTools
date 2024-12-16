@@ -1,12 +1,9 @@
 # LLMTools
 
-# Ollama Client
-Documentation for [Ollama API](https://github.com/ollama/ollama/blob/main/docs/api.md#generate-a-completion)
+## Ollama Client
+If configure OllamaController you can reference http://localhost:8080/swagger-ui/index.html
 
-[routes.go](https://github.com/ollama/ollama/blob/main/docs/api.md#generate-a-completion) serves the endpoint for Ollama's API.
-
-## [CreateHander](https://github.com/ollama/ollama/blob/acd7d03266e1b2b1df07c608ba225eb46a57d4cf/server/routes.go#L639)
-### POST /api/create
+### Create Model `POST /ollama/create`
 Create a model from a Modelfile. It is recommended to set `modelfile` to the content of the Modelfile rather tha njust set `path`.
 This is a requirement for remote create. Remote model creation must alse create any file blobs, fields such as `FROM` and `ADAPTER`, explicitly with the server using Create a Blob and the value to the path indicated in the response.
 
@@ -37,7 +34,7 @@ Quantization types
 Creating a new model
 Request
 ```bash
-curl http://localhost:11434/api/create -d '{
+curl http://localhost:8080/ollama/create -d '{
   "model": "mario",
   "modelfile": "FROM llama3\nSYSTEM You are mario from Super Mario Bros."
 }'
@@ -58,8 +55,7 @@ Response
 {"status":"success"}
 ```
 
-## [PushHandler](https://github.com/ollama/ollama/blob/acd7d03266e1b2b1df07c608ba225eb46a57d4cf/server/routes.go#L574)
-### POST /api/push
+### PushHandler POST /ollama/push
 Upload a model to a model library. Requires registering for ollama.ai and adding a public key first.
 
 Parameters:
@@ -69,7 +65,7 @@ Parameters:
 
 Request
 ```bash
-curl http://localhost:11434/api/push -d '{
+curl http://localhost:8080/ollam/push -d '{
   "model": "mattw/pygmalion:latest"
 }'
 ```
@@ -114,8 +110,7 @@ If stream is set to false, then the response is a single JSON object:
 { "status": "success" }
 ```
 
-## [CopyHandler](https://github.com/ollama/ollama/blob/acd7d03266e1b2b1df07c608ba225eb46a57d4cf/server/routes.go#L947)
-### POST /api/copy
+### CopyHandler POST /ollama/copy
 Copy a model. Create a model with another name from an existing model.
 
 Parameters:
@@ -124,7 +119,7 @@ Parameters:
 
 Request:
 ```bash
-curl http://localhost:11434/api/copy -d '{
+curl http://localhost:8080/ollama/copy -d '{
   "from": "llama3.2:3b-instruct-q4_0",
   "to": "llama3.2:3b-instruct-q4_0-backup"
 }'
@@ -134,8 +129,7 @@ Response:
 - 200 OK: if successful
 - 404 Not Found: if the model does not exist
 
-## [DeleteHandler](https://github.com/ollama/ollama/blob/acd7d03266e1b2b1df07c608ba225eb46a57d4cf/server/routes.go#L710)
-### POST /api/delete
+### DeleteHandler POST /ollama/delete
 Delete a model and its data.
 
 Parameters:
@@ -143,7 +137,7 @@ Parameters:
 
 Request:
 ```bash
-curl http://localhost:11434/api/delete -d '{
+curl http://localhost:8080/ollama/delete -d '{
   "model": "llama3.2:3b-instruct-q4_0"
 }'
 ```
@@ -152,8 +146,7 @@ Response:
 - 200 OK: if successful
 - 404 Not Found: if the model does not exist
 
-## [ShowHandler](https://github.com/ollama/ollama/blob/acd7d03266e1b2b1df07c608ba225eb46a57d4cf/server/routes.go#L748)
-### POST /api/show
+### POST /ollama/show
 Show information about a model including details, modelfile, template, parameters, license, system prompt
 
 Parameters:
@@ -162,7 +155,7 @@ Parameters:
 
 Request
 ```bash
-curl http://localhost:11434/api/show -d '{
+curl http://localhost:8080/ollama/show -d '{
   "model": "llama3.2:3b-instruct-q4_0"
 }'
 ```
@@ -207,19 +200,13 @@ Response
 }
 ```
 
-## [CreateBlobHandler](https://github.com/ollama/ollama/blob/acd7d03266e1b2b1df07c608ba225eb46a57d4cf/server/routes.go#L1001)
-### POST /api/blob:digest
-
-## [HeadBlobHandler](https://github.com/ollama/ollama/blob/acd7d03266e1b2b1df07c608ba225eb46a57d4cf/server/routes.go#L986)
-### HEAD /api/blob:digest
+### HeadBlobHandler HEAD /ollama/blob:digest
 Checks if a blob exists. Ensures that the file blob used for a FROM or ADAPTER field exists on the server.
 This is checking yoru Ollama server not ollama.com.
 
-## [PsHander](https://github.com/ollama/ollama/blob/acd7d03266e1b2b1df07c608ba225eb46a57d4cf/server/routes.go#L1346)
-### GET /api/ps
+### PsHander GET /ollama/ps
 
-## [PullHandler](https://github.com/ollama/ollama/blob/acd7d03266e1b2b1df07c608ba225eb46a57d4cf/server/routes.go#L523)
-### POST /api/pull
+### PullHandler POST /ollama/pull
 Download a model from the ollama library. Cancelled pulls are resumed where they left off, and multiple calls will share the same download progress.
 
 Parameters:
@@ -229,7 +216,7 @@ Parameters:
 
 Request
 ```bash
-curl http://localhost:11434/api/pull -d '{
+curl http://localhost:8080/ollama/pull -d '{
   "model": "llama3.2"
 }'
 ```
@@ -277,8 +264,7 @@ If `stream` is set to false, then the response is a single JSON object:
 }
 ```
 
-## [GenerateHandler](https://github.com/ollama/ollama/blob/acd7d03266e1b2b1df07c608ba225eb46a57d4cf/server/routes.go#L113)
-### POST /api/generate
+### GenerateHandler POST /ollama/generate
 Generate a response for a given prompt with a provided model. This is a streaming endpint, so there will be a series of responese. The final Response object will include statistics and additional data from the request.
 
 Paramaters:
@@ -299,13 +285,13 @@ Advance Parameters(optional):
 
 Example streaming
 ```bash
-curl http://localhost:11434/api/generate -d '{
+curl http://localhost:8080/ollama/generate -d '{
   "model": "qwen:32b",
   "prompt": "Why is the sky blue?"
 }'
 ```
 
-The final ronse in the stream also includes additional data about the generation:
+The final response in the stream also includes additional data about the generation:
 - `total_duration`: time spent generating the response
 - `load_duration`: time spend in nanoseconds loading the model
 - `prompt_eval_count`: number of tokens in the prompt
@@ -319,7 +305,7 @@ The final ronse in the stream also includes additional data about the generation
 If an empty prompt is provided, the model will be loaded into memory.
 Request
 ```bash
-curl http://localhost:11434/api/generate -d '{
+curl http://localhost:8080/ollama/generate -d '{
   "model": "qwen:32b",
   "prompt": ""
 }'
@@ -340,7 +326,7 @@ Response
 If an empty prompt is provided and `keep_alive` prameter is set to `0`, a model will be unload from memory.
 Request
 ```bash
-curl http://localhost:11434/api/generate -d '{
+curl http://localhost:8080/ollama/generate -d '{
   "model": "qwen:32b",
   "keep_alive": 0
 }'
@@ -357,11 +343,7 @@ Response
 }
 ```
 
-
-### POST /v1/completions
-
-## [ChatHandler](https://github.com/ollama/ollama/blob/acd7d03266e1b2b1df07c608ba225eb46a57d4cf/server/routes.go#L1387)
-### POST /api/chat
+### ChatHandler POST /ollama/chat
 Generate the next message in a chat with a provided model. This is a streaming endpoint, so there will be a series of responses. Streaming can be disabled using `"stream": false`. The final response object will include statistics and additional data from the request.
 
 Parameters
@@ -381,24 +363,24 @@ Advance parameters (optional):
 - `stream`: if `false` the response will be returned as a singel response object, rather than as stream of objects
 - `keep_alive`: constrols how long the model will stay loaded into memory following the request  (default: `5m`)
 
-#### Difference and Similarities between /api/generate and /api/chat
+#### Difference and Similarities between /ollama/generate and /ollama/chat
 Differences:
 1. Purpose:
-- `/api/generate`: Generates a response for a given pompt using a specified model.
-- `/api/chat`: Generates the next message in a chat with a provided model, maintaining conversational context and memory.
+- `/ollama/generate`: Generates a response for a given pompt using a specified model.
+- `/ollama/chat`: Generates the next message in a chat with a provided model, maintaining conversational context and memory.
 2. Parameters:
-- `/api/generate`:
+- `/ollama/generate`:
     - `prompt`: The prompt to generate a response for.
     - `suffix`: Text to append after the models's response.
     - `images`: List of base64-encoded imates for multimodal models.
-- `/api/chat`:
+- `/ollama/chat`:
     - `messages`: List of messages in the chat to maintain context.
     - `tools`: Tools for the model to use, requires `stream` to be `false`.
 3. Streaming:
-- Both endpoints support streaming responses when `stream` is set to `true`. However, for `api/chat`, streaming is more commonly used to handle ongoing conversations.
+- Both endpoints support streaming responses when `stream` is set to `true`. However, for `ollama/chat`, streaming is more commonly used to handle ongoing conversations.
 4. Contextual Memory:
-- `/api/generate`: Can use a `context` parameter to maintain short conversational memory.
-- `/api/chat`: Maintains chat memory through the `messages` parameter, allowing for multi-turn conversations.
+- `/ollama/generate`: Can use a `context` parameter to maintain short conversational memory.
+- `/ollama/chat`: Maintains chat memory through the `messages` parameter, allowing for multi-turn conversations.
 
 Similarities:
 1. Response Structure:
@@ -408,21 +390,21 @@ Similarities:
 - Both endpoints require specifying a model to use for genrating responses.
 
 #### Where is the conversation context stored in memory?
-The memory for the `/api/chat` endpoint is managed and allocated within the GPU and system memory, as indicated by various references to memory management in the repository. Specific handling of memory for devices is detailed in files like `ggml-cuda.cu` and other GU-related files.
+The memory for the `/ollama/chat` endpoint is managed and allocated within the GPU and system memory, as indicated by various references to memory management in the repository. Specific handling of memory for devices is detailed in files like `ggml-cuda.cu` and other GU-related files.
 In a distributed system, if the memory used for maintaining chat context isn't persisted or shared across nodes, it can indeed be lost if the system state isn't properly synchronized or save.
 
-#### Function Calleing with `/api/chat` and `/api/generate`
-`/api/chat`:
+#### Function Calleing with `/ollama/chat` and `/ollama/generate`
+`/ollama/chat`:
 - Supports function calling using the `tools` parameter.
 - The `tools` parameter allows specifying tools for the model to use if supported. This requires `stream` to be set to `false`.
 - Example usage includes definign functions that the model can call during the chat session.
 
-`/api/generate`:
+`/ollama/generate`:
 - Does not natively support function calling throught a dedicated `tools` parameter.
 - Primarily used for generating responses based on provided prompts, with options for advanced parameters and no direct function calling capability.
 
-#### Tools in `/api/chat`
-The `tools` parameter in `/api/chat` is indeed for function calling.
+#### Tools in `/ollama/chat`
+The `tools` parameter in `/ollama/chat` is indeed for function calling.
 It allows the model to utilize defined tools, enabling more complex interactions and integrations within the chat context.
 
 #### Chat With History
@@ -430,7 +412,7 @@ Send a chat message with a conversation history. You can use the same approacht 
 
 Request
 ```bash
-curl http://localhost:11434/api/chat -d '{
+curl http://localhost:8080/ollama/chat -d '{
   "model": "qwen:32b",
   "stream": false,
   "messages": [
@@ -453,7 +435,7 @@ curl http://localhost:11434/api/chat -d '{
 #### Chat With Tools
 Request
 ```bash
-curl http://localhost:11434/api/chat -d '{
+curl http://localhost:8080/ollama/chat -d '{
   "model": "llama3.1:8b-instruct-q4_0",
   "messages": [
     {
@@ -522,7 +504,7 @@ Response
 
 Another request
 ```bash
-curl http://localhost:11434/api/chat -d '{
+curl http://localhost:8080/ollama/chat -d '{
   "model": "llama3.2:1b",
   "messages": [
     {
@@ -591,7 +573,7 @@ Response
 
 Another request
 ```bash
-curl http://localhost:11434/api/chat -d '{
+curl http://localhost:8080/ollama/chat -d '{
   "model": "llama3.2:3b-instruct-q4_0",
   "messages": [
     {
@@ -658,10 +640,7 @@ Response
 }
 ```
 
-### POST /v1/chat/completions
-
-## [EmbedHandler](https://github.com/ollama/ollama/blob/acd7d03266e1b2b1df07c608ba225eb46a57d4cf/server/routes.go#L349)
-### POST /api/embed
+### EmbedHandler POST /ollama/embed
 Generate embeddings from a model.
 Use cases:
 - `Semantic Search`: Improve search results by finding semantically similar documents or queries.
@@ -678,22 +657,17 @@ The closest embeddings, based on the computed distance, are considered the most 
 
 Request:
 ```bash
-curl http://localhost:11434/api/embed -d '{
+curl http://localhost:8080/ollama/embed -d '{
   "model": "qwen:32b",
   "input": "Why is the sky blue?"
 }'
 ```
 
-## Deprecated [EmbeddingsHander](https://github.com/ollama/ollama/blob/acd7d03266e1b2b1df07c608ba225eb46a57d4cf/server/routes.go#L483)
-### Deprecated POST /api/embeddings
-### Deprecated POST /v1/embeddings
-
-## [ListHandler](https://github.com/ollama/ollama/blob/acd7d03266e1b2b1df07c608ba225eb46a57d4cf/server/routes.go#L897)
-### GET /api/tags
+### ListHandler GET /ollama/tags
 List models that are locally available
 Request
 ```bash
-curl http://localhost:11434/api/tags
+curl http://localhost:8080/ollama/tags
 ```
 
 Response
@@ -733,15 +707,13 @@ Response
   ]
 }
 ```
-### GET /api/version
-
 
 ### Structured Output
 Structured outputs are supported by providing a JSON schema in the `schema` parameter and setting `format` to "json". The model will generate a response that matches the schema.
 
 Example Request:
 ```bash
-curl -X POST http://localhost:11434/api/generate -H "Content-Type: application/json" -d '{
+curl -X POST http://localhost:8080/ollama/generate -H "Content-Type: application/json" -d '{
   "model": "qwen:32b",
   "prompt": "Ollama is 22 years old and is busy saving the world.",
   "stream": false,
@@ -794,7 +766,7 @@ Response:
 Request (JSON mode)
 request
 ```bash
-curl http://localhost:11434/api/generate -d '{
+curl http://localhost:8080/ollama/generate -d '{
   "model": "qwen:32b",
   "prompt": "What color is the sky at different times of the day? Respond using JSON",
   "format": "json",
@@ -824,7 +796,7 @@ response
 For repoducible outputs, set `seed` to a number:
 Request
 ```bash
-curl http://localhost:11434/api/generate -d '{
+curl http://localhost:8080/ollama/generate -d '{
   "model": "qwen:32b",
   "prompt": "Why is the sky blue?",
   "stream": false,
