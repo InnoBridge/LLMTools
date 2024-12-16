@@ -29,9 +29,12 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 
+/**
+ * Represents a request for a chat interaction, including model, messages, and other options.
+ * Provides a no-arguments constructor to allow flexible instantiation.
+ */
 @Data
 @SuperBuilder
-@NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(Include.NON_NULL)
 public class ChatRequest extends Options {
@@ -55,10 +58,25 @@ public class ChatRequest extends Options {
     @JsonProperty(TOOLS)
     private List<Tool> tools;
 
-    
-   
+     /**
+     * Default no-arguments constructor for ChatRequest.
+     */
+    public ChatRequest() {
+        super();
+    }
+
+    /**
+     * Custom deserializer for the format field, which can be either a string or a JSON object.
+     */
     public static class FormatDeserializer extends JsonDeserializer<String> {
         private static final ObjectMapper objectMapper = new ObjectMapper();
+
+        /**
+         * Default constructor for FormatDeserializer.
+         */
+        public FormatDeserializer() {
+            super();
+        }
 
         @Override
         public String deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {

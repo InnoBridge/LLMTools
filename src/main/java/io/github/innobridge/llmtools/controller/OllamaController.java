@@ -72,8 +72,6 @@ import static io.github.innobridge.llmtools.constants.OllamaConstants.MIROSTAT_T
 import static io.github.innobridge.llmtools.constants.OllamaConstants.MIROSTAT_ETA;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.PENALIZE_NEWLINE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.STOP;
-import static io.github.innobridge.llmtools.constants.OllamaConstants.MESSAGES;
-import static io.github.innobridge.llmtools.constants.OllamaConstants.TOOLS;
 
 import static io.github.innobridge.llmtools.constants.OllamaConstants.GENERATE_STREAM_ENDPOINT;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
@@ -87,7 +85,6 @@ import static io.github.innobridge.llmtools.constants.OllamaConstants.TRUNCATE;
 
 import io.github.innobridge.llmtools.models.request.CopyRequest;
 import io.github.innobridge.llmtools.models.request.PullRequest;
-import io.github.innobridge.llmtools.models.request.PullRequest.PullRequestBuilder;
 import io.github.innobridge.llmtools.models.request.PushRequest;
 import io.github.innobridge.llmtools.models.request.CreateRequest;
 import io.github.innobridge.llmtools.models.request.DeleteRequest;
@@ -378,7 +375,7 @@ public class OllamaController {
         @RequestParam(required = false, value = USERNAME) String username,
         @RequestParam(required = false, value = PASSWORD) String password
     ) {
-        PullRequestBuilder builder = PullRequest.builder()
+        var builder = PullRequest.builder()
             .model(model);
         if (insecure != null) builder.insecure(insecure);
         if (username != null) builder.username(username);
@@ -406,7 +403,7 @@ public class OllamaController {
         @RequestParam(required = false, value = USERNAME) String username,
         @RequestParam(required = false, value = PASSWORD) String password
     ) {
-        PullRequestBuilder builder = PullRequest.builder()
+        var builder = PullRequest.builder()
             .model(model);
         if (insecure != null) builder.insecure(insecure);
         if (username != null) builder.username(username);
