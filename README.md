@@ -1,7 +1,58 @@
 # LLMTools
+Changelog
+| Version | Changes |
+|---------|---------|
+| 0.0.1 | Java Ollama Client for interacting with Ollama API|
 
-## Ollama Client
-If configure OllamaController you can reference http://localhost:8080/swagger-ui/index.html
+## Ollama Client and Controller
+Java client for interacting with Ollama API.
+
+### Usage
+Reference https://github.com/InnoBridge/LLMToolsDemo
+
+Add the dependency in pom.xml
+```
+<dependency>
+    <groupId>io.github.innobridge</groupId>
+    <artifactId>llmtools</artifactId>
+    <version>{llmtools version}</version>
+</dependency>
+```
+
+Add base URL to resources/application.properties
+```
+ollama.baseurl=http://localhost:11434
+```
+
+Configure Spring beans
+```
+
+@Configuration
+public class OllamaConfig {
+    
+    @Bean
+    public OllamaClient ollamaClient(
+            @Value("${ollama.baseurl}") String baseUrl
+    ) {
+        WebClient webClient = WebClient.builder()
+                .baseUrl(baseUrl)
+                .build();
+                
+        return new OllamaClientImpl(webClient);
+    }
+
+    @Bean
+    public OllamaController ollamaController(OllamaClient ollamaClient) {
+        return new OllamaController(ollamaClient);
+    }
+}
+```
+
+API Documentation
+Once configured, access the Swagger UI documentation at:
+
+Local development: http://localhost:8080/swagger-ui/index.html
+Or your configured server URL: http://<your-server>/swagger-ui/index.html
 
 ### Create Model `POST /ollama/create`
 Create a model from a Modelfile. It is recommended to set `modelfile` to the content of the Modelfile rather tha njust set `path`.
