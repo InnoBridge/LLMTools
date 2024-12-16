@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.github.innobridge.llmtools.client.OllamaClient;
+import io.github.innobridge.llmtools.exceptions.OllamaException;
 import io.github.innobridge.llmtools.models.request.GenerateRequest;
 import io.github.innobridge.llmtools.models.response.GenerateResponse;
 import io.github.innobridge.llmtools.models.response.ListProcessModelResponse;
@@ -36,6 +37,7 @@ import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -70,6 +72,9 @@ import static io.github.innobridge.llmtools.constants.OllamaConstants.MIROSTAT_T
 import static io.github.innobridge.llmtools.constants.OllamaConstants.MIROSTAT_ETA;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.PENALIZE_NEWLINE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.STOP;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.MESSAGES;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.TOOLS;
+
 import static io.github.innobridge.llmtools.constants.OllamaConstants.GENERATE_STREAM_ENDPOINT;
 import static org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE;
 
@@ -114,6 +119,12 @@ import static io.github.innobridge.llmtools.constants.OllamaConstants.SHOW_ENDPO
 import static io.github.innobridge.llmtools.constants.OllamaConstants.LIST_MODELS_ENDPOINT;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.BLOB_ENDPOINT;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.LIST_RUNNING_MODELS_ENDPOINT;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.CHAT_ENDPOINT;
+import static io.github.innobridge.llmtools.constants.OllamaConstants.CHAT_STREAM_ENDPOINT;
+
+import io.github.innobridge.llmtools.models.request.ChatRequest;
+import io.github.innobridge.llmtools.models.response.ChatResponse;
+import io.github.innobridge.llmtools.models.Message;
 
 @Slf4j
 @RestController
@@ -195,7 +206,16 @@ public class OllamaController {
         return ollamaClient.generate(builder.build())
         .map(response -> ResponseEntity.ok(response))
         .onErrorResume(e -> {
-            return Mono.just(ResponseEntity.status(500).body(null));
+            log.error("Chat error: {}", e.getMessage(), e);
+            // Create empty ChatResponse with error message
+            GenerateResponse errorResponse = GenerateResponse.builder()
+                .doneReason(e.getMessage())
+                .build();
+                    
+            return Mono.just(ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(errorResponse));
         });
     }
     
@@ -631,5 +651,50 @@ public class OllamaController {
                 });
     }
 
-    // chat
+    @PostMapping(CHAT_ENDPOINT)
+    @Operation(summary = "Chat with Ollama model")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = CREATED,
+            description = "Chat response",
+            content = @Content(mediaType = CONTENT_TYPE,
+                schema = @Schema(implementation = ChatResponse.class)))
+    })
+    public Mono<ResponseEntity<ChatResponse>> chat(@RequestBody ChatRequest chatRequest) {
+        return ollamaClient.chat(chatRequest)
+            .map(response -> ResponseEntity.ok().body(response))
+            .onErrorResume(e -> {
+                log.error("Chat error: {}", e.getMessage(), e);
+                // Create empty ChatResponse with error message
+                ChatResponse errorResponse = ChatResponse.builder()
+                    .doneReason(e.getMessage())
+                    .build();
+                
+                return Mono.just(ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(errorResponse));
+            });
+    }
+
+    @PostMapping(value = CHAT_STREAM_ENDPOINT, produces = TEXT_EVENT_STREAM_VALUE)
+    @Operation(summary = "Chat with Ollama model with streaming support")
+    @ApiResponse(
+        responseCode = CREATED,
+        description = "Chat streaming response",
+        content = @Content(
+            mediaType = TEXT_EVENT_STREAM_VALUE,
+            schema = @Schema(implementation = ChatResponse.class)
+        )
+    )
+    public Flux<ServerSentEvent<ChatResponse>> chatStream(@RequestBody ChatRequest chatRequest) {
+        return ollamaClient.chatStream(chatRequest)
+            .map(response -> ServerSentEvent.<ChatResponse>builder()
+                .data(response)
+                .build())
+            .onErrorResume(e -> {
+                log.error("Error generating chat stream", e);
+                return Flux.empty();
+            });
+    }
+
 }

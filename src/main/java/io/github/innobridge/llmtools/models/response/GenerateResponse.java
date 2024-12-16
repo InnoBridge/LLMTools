@@ -8,9 +8,13 @@ import static io.github.innobridge.llmtools.constants.OllamaConstants.MODEL;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.RESPONSE;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import lombok.Builder;
+
 import java.time.Instant;
 import java.util.List;
 
+@Builder
 public class GenerateResponse extends Metrics {
 
     @JsonProperty(MODEL)

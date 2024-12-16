@@ -6,7 +6,10 @@ import lombok.AllArgsConstructor;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.time.ZonedDateTime;  // Changed from LocalDateTime
+
+import io.github.innobridge.llmtools.models.Message;
+
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -54,7 +57,7 @@ public class ShowResponse {
     private Map<String, Object> projectorInfo;
     
     @JsonProperty(MODIFIED_AT)
-    private ZonedDateTime modifiedAt;
+    private Instant modifiedAt;
 
     public String getLicense() {
         return license;
@@ -128,11 +131,11 @@ public class ShowResponse {
         this.projectorInfo = projectorInfo;
     }
 
-    public ZonedDateTime getModifiedAt() {
+    public Instant getModifiedAt() {
         return modifiedAt;
     }
 
-    public void setModifiedAt(ZonedDateTime modifiedAt) {
+    public void setModifiedAt(Instant modifiedAt) {
         this.modifiedAt = modifiedAt;
     }
 }

@@ -7,6 +7,8 @@ import java.io.IOException;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import io.github.innobridge.llmtools.models.request.EmbedRequest;
 import io.github.innobridge.llmtools.models.request.GenerateRequest;
 import io.github.innobridge.llmtools.models.request.PullRequest;
@@ -15,12 +17,14 @@ import io.github.innobridge.llmtools.models.request.CreateRequest;
 import io.github.innobridge.llmtools.models.request.PushRequest;
 import io.github.innobridge.llmtools.models.request.DeleteRequest;
 import io.github.innobridge.llmtools.models.request.ShowRequest;
+import io.github.innobridge.llmtools.models.request.ChatRequest;
 import io.github.innobridge.llmtools.models.response.EmbedResponse;
 import io.github.innobridge.llmtools.models.response.GenerateResponse;
 import io.github.innobridge.llmtools.models.response.ListResponse;
 import io.github.innobridge.llmtools.models.response.ProgressResponse;
 import io.github.innobridge.llmtools.models.response.ShowResponse;
 import io.github.innobridge.llmtools.models.response.ListProcessModelResponse;
+import io.github.innobridge.llmtools.models.response.ChatResponse;
 
 /**
  * Interface for interacting with the Ollama API.
@@ -111,55 +115,16 @@ public interface OllamaClient {
     Flux<GenerateResponse> generateStream(GenerateRequest request);
 
     /**
-     * Generate completions from a model.
-     * @param model The name of the model
-     * @param prompt The prompt to generate completions from
-     */
-    default Mono<String> completions(String model, String prompt) {
-        return completions(model, prompt, false).collectList().map(list -> String.join("", list));
-    }
-
-    /**
-     * Generate completions from a model with streaming support.
-     * @param model The name of the model
-     * @param prompt The prompt to generate completions from
-     * @param stream If true, returns a streaming response
-     */
-    Flux<String> completions(String model, String prompt, boolean stream);
-
-    /**
      * Chat with a model.
-     * @param model The name of the model
-     * @param messages The chat messages
+     * @param request The chat request containing model and messages
      */
-    default Mono<String> chat(String model, String messages) {
-        return chat(model, messages, false).collectList().map(list -> String.join("", list));
-    }
+    Mono<ChatResponse> chat(ChatRequest request);
 
     /**
      * Chat with a model with streaming support.
-     * @param model The name of the model
-     * @param messages The chat messages
-     * @param stream If true, returns a streaming response
+     * @param request The chat request containing model and messages
      */
-    Flux<String> chat(String model, String messages, boolean stream);
-
-    /**
-     * Chat completions with a model.
-     * @param model The name of the model
-     * @param messages The chat messages
-     */
-    default Mono<String> chatCompletions(String model, String messages) {
-        return chatCompletions(model, messages, false).collectList().map(list -> String.join("", list));
-    }
-
-    /**
-     * Chat completions with a model with streaming support.
-     * @param model The name of the model
-     * @param messages The chat messages
-     * @param stream If true, returns a streaming response
-     */
-    Flux<String> chatCompletions(String model, String messages, boolean stream);
+    Flux<ChatResponse> chatStream(ChatRequest request);
 
     /**
      * Generate embeddings from a model.
@@ -172,9 +137,4 @@ public interface OllamaClient {
      * List available models.
      */
     Mono<ListResponse> listModels();
-
-    /**
-     * Get API version.
-     */
-    Mono<String> getVersion();
 }

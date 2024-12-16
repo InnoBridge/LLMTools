@@ -1,18 +1,14 @@
 package io.github.innobridge.llmtools.client;
 
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Flux;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import io.github.innobridge.llmtools.exceptions.OllamaException;
-import io.github.innobridge.llmtools.models.request.ChatCompletionsRequest;
 import io.github.innobridge.llmtools.models.request.ChatRequest;
-import io.github.innobridge.llmtools.models.request.CompletionsRequest;
 import io.github.innobridge.llmtools.models.request.CopyRequest;
 import io.github.innobridge.llmtools.models.request.CreateRequest;
 import io.github.innobridge.llmtools.models.request.DeleteRequest;
@@ -27,6 +23,7 @@ import io.github.innobridge.llmtools.models.response.ListResponse;
 import io.github.innobridge.llmtools.models.response.ProgressResponse;
 import io.github.innobridge.llmtools.models.response.ShowResponse;
 import io.github.innobridge.llmtools.models.response.ListProcessModelResponse;
+import io.github.innobridge.llmtools.models.response.ChatResponse;
 import lombok.extern.slf4j.Slf4j;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -44,7 +41,6 @@ import static io.github.innobridge.llmtools.constants.OllamaConstants.API_PS_ROU
 import static io.github.innobridge.llmtools.constants.OllamaConstants.API_PULL_ROUTE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.V1_COMPLETIONS_ROUTE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.API_CHAT_ROUTE;
-import static io.github.innobridge.llmtools.constants.OllamaConstants.API_CHAT_COMPLETIONS_ROUTE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.API_EMBED_ROUTE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.API_TAGS_ROUTE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.API_VERSION_ROUTE;
@@ -223,57 +219,29 @@ public class OllamaClientImpl implements OllamaClient {
     }
 
     @Override
-    public Flux<String> completions(String model, String prompt, boolean stream) {
-        return webClient.post()
-                .uri(V1_COMPLETIONS_ROUTE)
-                .contentType(APPLICATION_JSON)
-                .bodyValue(new CompletionsRequest(model, prompt, stream))
-                .retrieve()
-                .bodyToFlux(String.class)
-                .flatMap(response -> {
-                    try {
-                        JsonNode node = objectMapper.readTree(response);
-                        return Mono.just(node.path("choices").get(0).path("text").asText());
-                    } catch (Exception e) {
-                        return Mono.error(e);
-                    }
-                });
-    }
-
-    @Override
-    public Flux<String> chat(String model, String messages, boolean stream) {
+    public Mono<ChatResponse> chat(ChatRequest request) {
+        request.setStream(false);
         return webClient.post()
                 .uri(API_CHAT_ROUTE)
                 .contentType(APPLICATION_JSON)
-                .bodyValue(new ChatRequest(model, messages, stream))
+                .bodyValue(request)
                 .retrieve()
-                .bodyToFlux(String.class)
-                .flatMap(response -> {
-                    try {
-                        JsonNode node = objectMapper.readTree(response);
-                        return Mono.just(node.path("message").path("content").asText());
-                    } catch (Exception e) {
-                        return Mono.error(e);
-                    }
-                });
+                .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), this::handleErrorResponse)
+                .bodyToMono(ChatResponse.class)
+                .doOnError(this::handleErrorLogging);
     }
 
     @Override
-    public Flux<String> chatCompletions(String model, String messages, boolean stream) {
+    public Flux<ChatResponse> chatStream(ChatRequest request) {
+        request.setStream(true);
         return webClient.post()
-                .uri(API_CHAT_COMPLETIONS_ROUTE)
+                .uri(API_CHAT_ROUTE)
                 .contentType(APPLICATION_JSON)
-                .bodyValue(new ChatCompletionsRequest(model, messages, stream))
+                .bodyValue(request)
                 .retrieve()
-                .bodyToFlux(String.class)
-                .flatMap(response -> {
-                    try {
-                        JsonNode node = objectMapper.readTree(response);
-                        return Mono.just(node.path("choices").get(0).path("message").path("content").asText());
-                    } catch (Exception e) {
-                        return Mono.error(e);
-                    }
-                });
+                .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), this::handleErrorResponse)
+                .bodyToFlux(ChatResponse.class)
+                .doOnError(this::handleErrorLogging);
     }
 
     @Override
@@ -292,14 +260,6 @@ public class OllamaClientImpl implements OllamaClient {
                 .uri(API_TAGS_ROUTE)
                 .retrieve()
                 .bodyToMono(ListResponse.class);
-    }
-
-    @Override
-    public Mono<String> getVersion() {
-        return webClient.get()
-                .uri(API_VERSION_ROUTE)
-                .retrieve()
-                .bodyToMono(String.class);
     }
 
     private Mono<Throwable> handleErrorResponse(ClientResponse clientResponse) {

@@ -5,18 +5,19 @@ import static io.github.innobridge.llmtools.constants.OllamaConstants.SIZE_VRAM;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.time.ZonedDateTime;
+
+import java.time.Instant;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProcessModelResponse extends ModelResponse {
     @JsonProperty(EXPIRES_AT)
-    private ZonedDateTime expiresAt;
+    private Instant expiresAt;
     
     @JsonProperty(SIZE_VRAM)
     private long sizeVRAM;
 
-    public ZonedDateTime getExpiresAt() { return expiresAt; }
-    public void setExpiresAt(ZonedDateTime expiresAt) { this.expiresAt = expiresAt; }
+    public Instant getExpiresAt() { return expiresAt; }
+    public void setExpiresAt(Instant expiresAt) { this.expiresAt = expiresAt; }
 
     public long getSizeVRAM() { return sizeVRAM; }
     public void setSizeVRAM(long sizeVRAM) { this.sizeVRAM = sizeVRAM; }
