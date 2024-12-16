@@ -27,6 +27,10 @@ import static io.github.innobridge.llmtools.constants.OllamaConstants.FORMAT;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.KEEP_ALIVE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.IMAGES;
 
+/**
+ * Represents a request for generating content using an LLM model.
+ * This class encapsulates all parameters needed for making a generation request.
+ */
 @Data
 @SuperBuilder
 @NoArgsConstructor
@@ -66,6 +70,12 @@ public class GenerateRequest extends Options {
     @JsonProperty(IMAGES)
     private List<byte[]> images;
 
+    /**
+     * Converts all fields of this request object into a Map representation.
+     * This is useful for serialization and API communication.
+     *
+     * @return A Map containing all non-null fields of this request
+     */
     @JsonIgnore
     public Map<String, Object> getOptions() {
         ObjectMapper mapper = new ObjectMapper();
