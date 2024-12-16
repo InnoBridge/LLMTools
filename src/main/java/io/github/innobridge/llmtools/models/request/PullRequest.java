@@ -1,8 +1,11 @@
 package io.github.innobridge.llmtools.models.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import static io.github.innobridge.llmtools.constants.OllamaConstants.INSECURE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.MODEL;
@@ -10,23 +13,26 @@ import static io.github.innobridge.llmtools.constants.OllamaConstants.PASSWORD;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.STREAM;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.USERNAME;
 
-@Getter
+
+@Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class PullRequest {
     @JsonProperty(MODEL)
-    private final String model;
+    private String model;
     
     @JsonProperty(INSECURE)
-    private final boolean insecure;
+    private boolean insecure;
     
     @JsonProperty(USERNAME)
-    private final String username;
+    private String username;
     
     @JsonProperty(PASSWORD)
-    private final String password;
+    private String password;
     
     @JsonProperty(STREAM)
-    private final Boolean stream;
+    private Boolean stream;
 
     public PullRequest setStream(Boolean stream) {
         return PullRequest.builder()
