@@ -7,11 +7,15 @@ import static io.github.innobridge.llmtools.constants.OllamaConstants.TOOL_CALLS
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
+import lombok.Data;
 
 import io.github.innobridge.llmtools.models.response.ToolCall;
 
 import java.util.List;
 
+@Data
+@Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Message {
     @JsonProperty(ROLE)
@@ -22,14 +26,4 @@ public class Message {
     private List<byte[]> images;
     @JsonProperty(TOOL_CALLS)
     private List<ToolCall> toolCalls;
-
-    // Getters and Setters
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
-    public String getContent() { return content; }
-    public void setContent(String content) { this.content = content; }
-    public List<byte[]> getImages() { return images; }
-    public void setImages(List<byte[]> images) { this.images = images; }
-    public List<ToolCall> getToolCalls() { return toolCalls; }
-    public void setToolCalls(List<ToolCall> toolCalls) { this.toolCalls = toolCalls; }
 }

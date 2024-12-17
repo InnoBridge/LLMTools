@@ -444,7 +444,7 @@ Similarities:
 The memory for the `/ollama/chat` endpoint is managed and allocated within the GPU and system memory, as indicated by various references to memory management in the repository. Specific handling of memory for devices is detailed in files like `ggml-cuda.cu` and other GU-related files.
 In a distributed system, if the memory used for maintaining chat context isn't persisted or shared across nodes, it can indeed be lost if the system state isn't properly synchronized or save.
 
-#### Function Calleing with `/ollama/chat` and `/ollama/generate`
+#### Function Calling with `/ollama/chat` and `/ollama/generate`
 `/ollama/chat`:
 - Supports function calling using the `tools` parameter.
 - The `tools` parameter allows specifying tools for the model to use if supported. This requires `stream` to be set to `false`.

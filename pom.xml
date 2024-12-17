@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>io.github.innobridge</groupId>
 	<artifactId>llmtools</artifactId>
-	<version>0.0.1</version>
+	<version>0.0.2-SNAPSHOT-1</version>
     <name>${project.groupId}:${project.artifactId}</name>
 	<description>Tools for interacting with LLMs</description>
     <url>https://github.com/innoBridge/LLMTools</url>

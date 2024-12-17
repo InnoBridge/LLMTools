@@ -8,19 +8,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.HttpServerErrorException.InternalServerError;
-import org.springframework.web.context.request.async.AsyncRequestTimeoutException;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.github.innobridge.llmtools.client.OllamaClient;
-import io.github.innobridge.llmtools.exceptions.OllamaException;
 import io.github.innobridge.llmtools.models.request.GenerateRequest;
 import io.github.innobridge.llmtools.models.response.GenerateResponse;
 import io.github.innobridge.llmtools.models.response.ListProcessModelResponse;
@@ -121,7 +117,6 @@ import static io.github.innobridge.llmtools.constants.OllamaConstants.CHAT_STREA
 
 import io.github.innobridge.llmtools.models.request.ChatRequest;
 import io.github.innobridge.llmtools.models.response.ChatResponse;
-import io.github.innobridge.llmtools.models.Message;
 
 @Slf4j
 @RestController
@@ -286,7 +281,6 @@ public class OllamaController {
         if (penalizeNewline != null) builder.penalizeNewline(penalizeNewline);
         if (stop != null) builder.stop(stop);    
 
-
         return ollamaClient.generateStream(builder.build())
             .map(response -> ServerSentEvent.<GenerateResponse>builder()
                 .data(response)
@@ -393,10 +387,15 @@ public class OllamaController {
     @ApiResponses(value= {
             @ApiResponse(responseCode = CREATED,
                     description = "Download model from Ollama Library streaming progress.",
-                    content = @Content(mediaType = CONTENT_TYPE,
-                            schema = @Schema(implementation = ProgressResponse.class)))
+                    content = {
+                        @Content(mediaType = MediaType.TEXT_EVENT_STREAM_VALUE,
+                                schema = @Schema(implementation = ProgressResponse.class)),
+                        @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                                schema = @Schema(implementation = ProgressResponse.class))
+                    })
                             })
-    @PostMapping(value = PULL_STREAM_ENDPOINT, produces = APPLICATION_NDJSON_VALUE)
+    @PostMapping(value = PULL_STREAM_ENDPOINT, 
+                produces = {MediaType.TEXT_EVENT_STREAM_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public Flux<ServerSentEvent<ProgressResponse>> pullModelStream(
         @RequestParam(required = true, value = MODEL) String model,
         @RequestParam(required = false, value = INSECURE) Boolean insecure,
@@ -417,6 +416,7 @@ public class OllamaController {
             log.error("Error generating stream", e);
             return Flux.empty();
         });
+    
     }
 
     @Operation(summary = "Copy a model")

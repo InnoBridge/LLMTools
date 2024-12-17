@@ -128,5 +128,4 @@ public class OllamaConstants {
     public static final String EXPIRES_AT = "expires_at";
     public static final String SIZE_VRAM = "size_vram";
     public static final String MESSAGE = "message";
-
 }
