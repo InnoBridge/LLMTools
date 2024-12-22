@@ -4,8 +4,10 @@ import static io.github.innobridge.llmtools.constants.OllamaConstants.FUNCTION;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Builder
 public class ToolCall {
     @JsonProperty(FUNCTION)
     private ToolCallFunction function;
