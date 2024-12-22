@@ -1,8 +1,9 @@
 # LLMTools
 Changelog
-| Version | Changes |
-|---------|---------|
-| 0.0.1 | Java Ollama Client for interacting with Ollama API|
+| Version | Changes | Bugs | Fixes |
+|---------|---------|------|-------|
+| 0.0.1 | Java Ollama Client for interacting with Ollama API|Stream endpoint||
+| 0.0.2 | Function Calling Support| |Stream endpoint|
 
 ## Ollama Client and Controller
 Java client for interacting with Ollama API.
