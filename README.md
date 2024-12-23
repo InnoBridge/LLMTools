@@ -3,7 +3,7 @@ Changelog
 | Version | Changes | Bugs | Fixes |
 |---------|---------|------|-------|
 | 0.0.1 | Java Ollama Client for interacting with Ollama API|Stream endpoint||
-| 0.0.2 | Function Calling Support| |Stream endpoint|
+| 0.0.4 | Function Calling Support| |Stream endpoint|
 
 ## Ollama Client and Controller
 Java client for interacting with Ollama API.
@@ -895,3 +895,331 @@ Response
   "eval_duration": 24063000000
 }
 ```
+
+# Function Calling
+## Motivation
+The flow of logic in traditional software is deterministic, meaning that the same input always produces the same output. This has the advantage of predictability but comes with the limitation that the software cannot handle scenarios that aren't explicitly hardcoded. For example, consider an API that provides the weather for a city or multiple cities. We can use this API to get the weather for New York, Austin, London, and so on. However, we can't use it to retrieve the weather for all the capital cities in Europe or for cities with a population greater than 10 million unless we implement additional hardcoded endpoints.
+
+On the other hand, function calling in large language models (LLMs) is stochastic - it doesn't always produce the same output for the same input. For instance, if we ask for the weather in provincial capitals in China, the LLM might return the weather for all provincial capitals, only a subset, or none at all. The strength of function calling in LLMs lies in their ability to understand the nuances of the input. If you ask whether you should wear a sweater, the model will likely invoke a function to fetch the weather.
+
+Conversely, if you inquire about the best restaurant in town, it will recognize that retrieving the weather is unnecessary and act accordingly.
+There are other Java libraries that support function calling, but they are often difficult to use. The goal of creating LLMTools is to provide developers with an ergonomic way to implement function calling.
+
+## Setup
+### Install LLMTools
+Add the dependency to [pom.xml](https://github.com/InnoBridge/LLMToolsDemo/blob/190deb14ce6444c4dc8883845be6011298f3012f/pom.xml#L38).
+```xml
+ <dependencies>
+  <dependency>
+   <groupId>io.github.innobridge</groupId>
+   <artifactId>llmtools</artifactId>
+   <version>{0.0.4 or greater}</version>
+  </dependency>
+ </dependencies>
+```
+
+## Define Your Functions
+You can reference [WeatherService.java](https://github.com/InnoBridge/LLMTools/blob/1a2c4cf8c8ef49ec923c6c5c53c107e58df0684f/src/main/java/io/github/innobridge/llmtools/function/WeatherService.java) on how to create your LLM function.
+```java
+@Service
+@FunctionDefinition(
+    name = "get_current_weather",
+    description = "Get the current weather in a given location"
+)
+public class WeatherService implements LLMFunction<WeatherService.Request, WeatherService.Response> {
+    
+    ...
+
+    @Override
+    public Request fromArguments(Map<String, Object> arguments) {
+        ...
+    }
+
+    @Override
+    public Response apply(Request request) {
+        ...
+    }
+
+    enum Format {
+        CELSIUS("celsius"), 
+        FAHRENHEIT("fahrenheit");
+
+        public final String formatName;
+
+        Format(String formatName) {
+            this.formatName = formatName;
+        }
+
+        @Override
+        public String toString() {
+            return formatName;
+        }
+    }
+
+    @JsonInclude(Include.NON_NULL)
+    record Request(
+        @JsonProperty(required = true) 
+        @JsonPropertyDescription("The city and state e.g. San Francisco, CA") 
+        String location,
+        @JsonProperty(required = true) 
+        @JsonPropertyDescription("The format to return the weather in, e.g. 'celsius' or 'fahrenheit'") 
+        Format format) {
+    }
+    
+    record Response(
+        Location location,
+        Current current
+    ) {
+        ...
+    }
+    
+}
+```
+
+You need to add the annotations `@FunctionDefinition`, `@JsonPropertyDescription`, and if the field is required `@JsonProperty(required=true)`.
+ 
+Additionally, you need to override the methods `fromArguments` and `apply`.
+The purpose of these annotation is to enable our Java application to call Ollama's API to invoke function calling. And according to Ollama's [documentation](https://ollama.com/blog/tool-support), the request payload for function calling must follow a specific structure.
+
+```json
+tools=[{
+      'type': 'function',
+      'function': {
+        'name': 'get_current_weather',
+        'description': 'Get the current weather for a city',
+        'parameters': {
+          'type': 'object',
+          'properties': {
+            'city': {
+              'type': 'string',
+              'description': 'The name of the city',
+            },
+          },
+          'required': ['city'],
+        },
+      },
+    }]
+```
+LLMTools uses these annotations to generate the JSON payload required to call Ollama's API for function calling.
+```json
+tools=[{
+  "name": "get_current_weather",
+  "description": "Get the current weather in a given location",
+  "parameters": {
+    "type": "Object",
+    "required": [
+      "format",
+      "location"
+    ],
+    "properties": {
+      "format": {
+        "type": "string",
+        "description": "The format to return the weather in, e.g. 'celsius' or 'fahrenheit'",
+        "enum": [
+          "celsius",
+          "fahrenheit"
+        ]
+      },
+      "location": {
+        "type": "string",
+        "description": "The name of the city e.g. San Francisco, CA",
+        "enum": null
+      }
+    }
+  }
+}]
+```
+
+The `apply(Request request)` method is where you define the logic or code to be executed when the function is called.
+When invoking function calling from Ollama, it will return the function name and its arguments as a `Map<String, Object>`. For example:
+```json
+[
+  {
+    "index": 0,
+    "name": "get_current_weather",
+    "arguments": {
+      "format": "celsius",
+      "location": "Beijing"
+    }
+  },
+  {
+    "index": 0,
+    "name": "get_current_weather",
+    "arguments": {
+      "format": "celsius",
+      "location": "Shanghai"
+    }
+  }
+]
+```
+Since the ``apply` method requires a `Request` object, the `fromArguments(Map<String, Object> arguments)` method is used to map a `Map<String, Object>` to a `Request`.
+
+### Configuring Function Calling
+Refer to [OllamaConfig.java](https://github.com/InnoBridge/LLMToolsDemo/blob/190deb14ce6444c4dc8883845be6011298f3012f/src/main/java/io/github/innobridge/llmtoolsdemo/configuration/OllamaConfig.java)
+Configure the `OllamaClient` to call Ollama's API.
+```java
+    @Bean
+    public OllamaClient ollamaClient(
+            @Value("${ollama.baseurl}") String baseUrl
+    ) {
+        WebClient webClient = WebClient.builder()
+                .baseUrl(baseUrl)
+                .build();
+                
+        return new OllamaClientImpl(webClient);
+    }
+```
+Configure your custom `LLMFunction`. In this example, we will configure the `WeatherService` and `BraveSearchService`.
+```java
+@Bean
+    public WeatherService weatherService(
+        @Value("${weather.api.baseurl}") String baseUrl,
+        @Value("${weather.api.key}") String apiKey
+    ) {
+        WebClient weatherClient = WebClient.builder()
+                .baseUrl(baseUrl)
+                .build();
+        return new WeatherService(weatherClient, apiKey);
+    }
+
+    @Bean
+    public BraveSearchService braveSearchService(
+        @Value("${bravesearch.api.baseurl}") String baseUrl,
+        @Value("${bravesearch.api.key}") String apiKey
+    ) {
+        WebClient braveSearchClient = WebClient.builder()
+                .baseUrl(baseUrl)
+                .build();
+        return new BraveSearchService(apiKey, braveSearchClient);
+    }
+```
+Now configure the `OllamaTools`, class which we will use for function calling.
+```java
+    @Bean
+    public Tools ollamaTools(OllamaClient ollamaClient, 
+                             WeatherService weatherService, 
+                             BraveSearchService braveSearchService) {
+        return new OllamaTools(ollamaClient, List.of(weatherService, braveSearchService));
+    }
+```
+When you pass your function into `OllamaTools`, it creates the `functionRepository`, a map of function names and their corresponding ``LLMFunction`.
+Now, let's configure `application.properties`.
+
+```properties
+# Weather API Configuration
+weather.api.key=${WEATHER_API_KEY}
+weather.api.baseurl=http://api.weatherapi.com/v1
+
+# Brave Search API Configuration
+bravesearch.api.key=${BRAVE_SEARCH_API_KEY}
+bravesearch.api.baseurl=https://api.search.brave.com
+
+ollama.baseurl=http://localhost:11434
+```
+
+Note: If you are using `WeatherService` and `BraveSearchService`, you need to create accounts on [Weather API](https://www.weatherapi.com/) and [Brave Search API](https://brave.com/search/api/). After creating an account and obtaining API keys, set the keys as environment variables:
+- `WEATHER_API_KEY` for WeatherAPI
+- `BRAVE_SEARCH_API_KEY` for Brave Search API
+
+### [Optional] Configure Swagger
+Add the following configuration.
+```java
+Configuration
+public class OpenApiConfig implements WebMvcConfigurer {
+
+  @Bean
+  public OpenAPI customOpenAPI() {
+    return new OpenAPI()
+        .info(new Info()
+            .title("Ollama API")
+            .version("1.0")
+            .description("API for native ollama"));
+
+  }
+
+  @Override
+  public void addResourceHandlers(ResourceHandlerRegistry registry) {
+    registry.addResourceHandler("/swagger-ui.html**").addResourceLocations("classpath:/META-INF/resources/");
+    registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
+  }
+
+  @Bean
+  public OllamaController ollamaController(OllamaClient ollamaClient) {
+      return new OllamaController(ollamaClient);
+  }
+
+  @Bean
+  public FunctionController functionController(
+     OllamaClient ollamaClient,    
+      Tools ollamaTools) {
+    return new FunctionController(ollamaClient, ollamaTools);
+  }
+}
+```
+
+### Download Models Supporting Function Call
+You can find the models that support function calls listed at [Ollama Tools](https://ollama.com/search?c=tools).
+To download a specific model, navigate to http://localhost:8080/swagger-ui/index.html#/ollama-controller/pullModel and enter the name of the model you want to pull.
+
+You can go to http://localhost:8080/swagger-ui/index.html#/function-controller/getToolModels to check which models that you downloaded supports function calling.
+
+## Function Calling
+Refer to [FunctionController.java](https://github.com/InnoBridge/LLMTools/blob/214789c612435b8f799ef24e59045fe71e122d17/src/main/java/io/github/innobridge/llmtools/controller/FunctionController.java#L115)
+
+### Getting a FunctionsExecutor
+We will create a chat request and pass the functions to `OllamaTools`' function call, which will return a `FunctionsExecutor`.
+```java
+   Tools ollamaTools;  
+
+    var builder = ChatRequest.builder();
+        builder.model("qwen2.5-coder:14b");
+        builder.messages(
+            List.of(
+                Message.builder()
+                    .role("user")
+                    .content("what is weather in provincial capital cities in china?") 
+                    .build()
+            )
+        );
+        builder.stream(false);
+        
+        FunctionsExecutor functionsExecutor = ollamaTools.functionCall(builder.build(), List.of(
+            new Tool(FUNCTION, FunctionConverter.convertToToolFunction(WeatherService.class)),
+            new Tool(FUNCTION, FunctionConverter.convertToToolFunction(BraveSearchService.class))
+        ));
+```
+The `FunctionsExecutor` object contains a list of function names and their respective parameters retrieved from the Ollama service.
+
+### Execute First
+The `executeFirst` method in `FunctionsExecutor` executes (calls the function's `apply` method) for the first occurrence of a function in the `FunctionsExecutor` list that matches the specified type.
+For example:
+```java
+Optional<WeatherService.Response> functionsExecutor
+                                        .executeFirst(WeatherService.class);
+```
+In this example, the `executeFirst` method will execute the first function in the list that returns a `WeatherResponse<WeatherService.Response>` object.
+
+### Execute Last
+The `executeLast` method in `FunctionsExecutor` executes (calls the function's `apply` method) for the last occurrence of a function in the `FunctionsExecutor` list that matches the specified type.
+For example:
+```java
+Optional<WeatherService.Response> functionsExecutor
+                                        .executeLast(WeatherService.class);
+```
+In this example, the `executeLast` method will call the apply method of the last function in the list that returns a `WeatherResponse<WeatherService.Response>` object.
+
+### Execute All
+The `executeAll` method in `FunctionsExecutor` executes (calls the apply method) for all occurrences of functions in the `FunctionsExecutor` list that match the specified type.
+For example:
+```java
+Optional<WeatherService.Response> functionsExecutor
+                                        .executeAll(WeatherService.class);
+```
+In this example, the `executeAll` method will call the apply method of all functions in the list that return a `WeatherResponse<WeatherService.Response>` object and collect their results into a list.
+
+If you don't specify a type.
+```java
+Optional<WeatherService.Response> functionsExecutor
+                                        .executeAll();
+```
+It will execute all the functions in `FunctionsExecutor`'s functionRepository, as long as the function exists in `FunctionsExecutor`'s functionRepository.
