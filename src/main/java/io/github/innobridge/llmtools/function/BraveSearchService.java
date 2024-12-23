@@ -43,11 +43,6 @@ public class BraveSearchService implements LLMFunction<BraveSearchService.Reques
     }
 
     @Override
-    public Response apply(Map<String, Object> arguments) {
-        return apply(fromArguments(arguments));    
-    }
-
-    @Override
     public Response apply(Request request) {
         if (request.query() == null || request.query().trim().isEmpty()) {
             throw new LLMFunctionException("Query is required");

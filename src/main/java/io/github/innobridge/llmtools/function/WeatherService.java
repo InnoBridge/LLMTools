@@ -50,11 +50,6 @@ public class WeatherService implements LLMFunction<WeatherService.Request, Weath
     }
 
     @Override
-    public Response apply(Map<String, Object> arguments) {
-        return apply(fromArguments(arguments));
-    }
-
-    @Override
     public Response apply(Request request) {
         if (request.location() == null || request.location().trim().isEmpty()) {
             throw new LLMFunctionException("Location is required");
