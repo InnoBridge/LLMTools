@@ -2,11 +2,11 @@ package io.github.innobridge.llmtools.controller;
 
 import static io.github.innobridge.llmtools.constants.OllamaConstants.FUNCTION;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.github.innobridge.llmtools.client.OllamaClient;
 import io.github.innobridge.llmtools.function.BraveSearchService;
+import io.github.innobridge.llmtools.function.LLMFunction;
 import io.github.innobridge.llmtools.function.WeatherService;
 import io.github.innobridge.llmtools.models.Message;
 import io.github.innobridge.llmtools.models.request.ChatRequest;
@@ -92,9 +93,20 @@ public class FunctionController {
         return ollamaTools.getToolSupportingModelResponses(sortOrder);
     }
 
+    enum FunctionClass {
+        WEATHER_SERVICE,
+        BRAVE_SEARCH
+    }
+
+    private HashMap<FunctionClass, Class<? extends LLMFunction>> functionMap = new HashMap<>();
+    {
+        functionMap.put(FunctionClass.WEATHER_SERVICE, WeatherService.class);
+        functionMap.put(FunctionClass.BRAVE_SEARCH, BraveSearchService.class);
+    }
+
     @GetMapping("/convertToToolFunction")
-    public ToolFunction convertToToolFunction() {
-        return FunctionConverter.convertToToolFunction(WeatherService.class);
+    public ToolFunction convertToToolFunction(@RequestParam FunctionClass functionClass) {
+        return FunctionConverter.convertToToolFunction(functionMap.get(functionClass));
     }
 
     @GetMapping("/execute/weatherservice/first")

@@ -1,5 +1,6 @@
 package io.github.innobridge.llmtools.tools;
 
+import io.github.innobridge.llmtools.function.LLMFunction;
 import io.github.innobridge.llmtools.models.request.ToolFunction;
 
 import static io.github.innobridge.llmtools.constants.OllamaConstants.APPLY;
@@ -16,6 +17,7 @@ import static io.github.innobridge.llmtools.constants.OllamaConstants.OBJECT;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.STRING;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.TO_STRING;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
@@ -34,14 +36,14 @@ public class FunctionConverter {
      * @return ToolFunction representation of the annotated class
      */
     public static ToolFunction convertToToolFunction(Class<?> clazz) {
-        // Get the parameters from the apply method if it's a Function interface
-        Method applyMethod = Arrays.stream(clazz.getMethods())
-            .filter(method -> method.getName().equals(APPLY))
-            .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("Class must implement Function interface"));
         
-
-        Class<?> parameterType = applyMethod.getParameterTypes()[0];
+        Class<?> parameterType = Arrays.stream(clazz.getGenericInterfaces())
+            .filter(type -> type instanceof java.lang.reflect.ParameterizedType)
+            .map(type -> (java.lang.reflect.ParameterizedType) type)
+            .filter(type -> type.getRawType().equals(LLMFunction.class))
+            .findFirst()
+            .map(type -> (Class<?>) type.getActualTypeArguments()[0])  // Gets L from LLMFunction<L,T>
+            .orElseThrow(() -> new IllegalArgumentException("Class must implement LLMFunction interface with proper type parameters"));
 
         // Build the ToolFunction
         return new ToolFunction(

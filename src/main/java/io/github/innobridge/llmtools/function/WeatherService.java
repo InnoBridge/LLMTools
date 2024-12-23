@@ -97,7 +97,7 @@ public class WeatherService implements LLMFunction<WeatherService.Request, Weath
     @JsonInclude(Include.NON_NULL)
     record Request(
         @JsonProperty(required = true) 
-        @JsonPropertyDescription("The city and state e.g. San Francisco, CA") 
+        @JsonPropertyDescription("The name of the city e.g. San Francisco, CA") 
         String location,
         @JsonProperty(required = true) 
         @JsonPropertyDescription("The format to return the weather in, e.g. 'celsius' or 'fahrenheit'") 
