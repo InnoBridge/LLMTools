@@ -3,12 +3,6 @@ package io.github.innobridge.llmtools.client;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Flux;
 
-import java.io.IOException;
-
-import org.springframework.web.multipart.MultipartFile;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
 import io.github.innobridge.llmtools.models.request.EmbedRequest;
 import io.github.innobridge.llmtools.models.request.GenerateRequest;
 import io.github.innobridge.llmtools.models.request.PullRequest;

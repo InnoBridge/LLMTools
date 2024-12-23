@@ -129,4 +129,26 @@ public class OllamaConstants {
     public static final String SIZE_VRAM = "size_vram";
     public static final String MESSAGE = "message";
 
+    // Functions
+    public static final String TOOLS_INDICATOR = ".Tools";
+
+    public static final String APPLY = "apply";
+    public static final String TO_STRING = "toString";
+    public static final String HASH_CODE = "hashCode";
+    public static final String EQUALS = "equals";
+    public static final String GET_CLASS = "getClass";
+    public static final String LAMBDA = "lambda$";
+    public static final String OBJECT = "Object";
+    public static final String GET = "get";
+    public static final String IS = "is";
+    public static final String STRING = "string";
+    public static final String INTEGER = "integer";
+    public static final String BOOLEAN = "boolean";
+    public static final String NUMBER = "number";
+
+    public static final String BYTE_SHORTHAND = "B";
+    public static final String KILO_BYTE_SHORTHAND = "KB";
+    public static final String MEGA_BYTE_SHORTHAND = "MB";
+    public static final String GIGA_BYTE_SHORTHAND = "GB";
+    public static final String TERA_BYTE_SHORTHAND = "TB";
 }

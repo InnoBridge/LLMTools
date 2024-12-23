@@ -39,11 +39,9 @@ import static io.github.innobridge.llmtools.constants.OllamaConstants.API_SHOW_R
 import static io.github.innobridge.llmtools.constants.OllamaConstants.API_BLOBS_ROUTE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.API_PS_ROUTE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.API_PULL_ROUTE;
-import static io.github.innobridge.llmtools.constants.OllamaConstants.V1_COMPLETIONS_ROUTE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.API_CHAT_ROUTE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.API_EMBED_ROUTE;
 import static io.github.innobridge.llmtools.constants.OllamaConstants.API_TAGS_ROUTE;
-import static io.github.innobridge.llmtools.constants.OllamaConstants.API_VERSION_ROUTE;
 
 /**
  * Implementation of the OllamaClient interface using WebClient.
