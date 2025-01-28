@@ -67,21 +67,21 @@ public class BraveSearchService implements LLMFunction<BraveSearchService.Reques
     }
 
     @JsonInclude(Include.NON_NULL)
-    record Request(
+    public record Request(
         @JsonProperty(required = true)
         @JsonPropertyDescription("The query to search for")
         String query
     ) {}
 
-    record Response(
+    public record Response(
         @JsonProperty("web")
         WebResults web
     ) {
-        record WebResults(
+        public record WebResults(
             @JsonProperty("results")
             List<WebResult> results
         ) {
-            record WebResult(
+            public record WebResult(
                 @JsonProperty("title")
                 String title,
                 @JsonProperty("url")
