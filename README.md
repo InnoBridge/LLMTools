@@ -4,6 +4,7 @@ Changelog
 |---------|---------|------|-------|
 | 0.0.1 | Java Ollama Client for interacting with Ollama API|Stream endpoint||
 | 0.0.4 | Function Calling Support| |Stream endpoint|
+| 0.0.5 | Make WeatherService and BraveSearchService's Request and Response public||
 
 ## Ollama Client and Controller
 Java client for interacting with Ollama API.
